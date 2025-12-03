@@ -296,14 +296,27 @@ export const ApiService = {
 Required environment variables (see `.env.example`):
 
 ```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=           # or PUBLIC_SUPABASE_URL for SvelteKit
-NEXT_PUBLIC_SUPABASE_ANON_KEY=      # or PUBLIC_SUPABASE_ANON_KEY for SvelteKit
-SUPABASE_SECRET_KEY=                # Service role key (server-side only)
+# Supabase (New API Key System - NOT the legacy anon/service_role JWT keys)
+NEXT_PUBLIC_SUPABASE_URL=               # or PUBLIC_SUPABASE_URL for SvelteKit
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=   # sb_publishable_... (safe for browser)
+SUPABASE_SECRET_KEY=                    # sb_secret_... (server-side only, bypasses RLS)
 
 # App
-NEXT_PUBLIC_APP_URL=                # or PUBLIC_APP_URL for SvelteKit
+NEXT_PUBLIC_APP_URL=                    # or PUBLIC_APP_URL for SvelteKit
 ```
+
+### Supabase API Keys (Important!)
+
+Supabase now uses a new API key system. **Do NOT use the legacy JWT-based keys:**
+
+| Key Type | Format | Use |
+|----------|--------|-----|
+| **Publishable** | `sb_publishable_...` | Safe for browser/client (replaces `anon`) |
+| **Secret** | `sb_secret_...` | Server-side only, bypasses RLS (replaces `service_role`) |
+| ~~anon~~ | JWT | **LEGACY - do not use** |
+| ~~service_role~~ | JWT | **LEGACY - do not use** |
+
+Get your keys from: Supabase Dashboard → Settings → API Keys
 
 **Critical**: Never commit `.env.local` or expose secret keys in client code
 
