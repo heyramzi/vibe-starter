@@ -1,88 +1,106 @@
-# Cursor Project Template
+# Vibe Starter
 
-## Overview
-A comprehensive starter template for projects using Cursor AI-powered IDE. This template provides structure, documentation templates, and best practices to help you build clean, maintainable code with effective AI collaboration.
+Production-ready starter templates with Supabase, TailwindCSS 4, and TypeScript. Choose your framework and start building.
 
-## Structure
-Key directories and files in this template:
-- `/src`: Core source code (add your application code here)
-- `/.doc`: Documentation templates and project handoff documents
-- `/tests`: Add test files here (create this directory when needed)
-- `README.md`: Project documentation (this file)
-- `.cursorrules`: Clean code principles for AI assistance
-- `PRD.md`: Product Requirements Document template
-- `changelog.md`: Template for tracking project changes
+## Features
 
-## Getting Started
+- **Japanese Coding Principles**: 簡潔 (simplicity), 純粋 (purity), 効率 (efficiency)
+- **Const Service Pattern**: Organized, discoverable code with IDE autocomplete
+- **Supabase Ready**: Auth and database pre-configured
+- **TailwindCSS 4**: Latest version with CSS-first configuration
+- **TypeScript Strict**: Full type safety out of the box
+- **Testing Setup**: Vitest configured and ready
+- **AI-Optimized**: `.claude/` documentation for Claude Code
 
-1. Replace this README content with your actual project details
-2. Add your source code to the `/src` directory
-3. Update the PRD.md with your project requirements
-4. Use the feature-handoff template for collaboration
-5. Track changes in the changelog.md file
+## Choose Your Framework
 
-## Using Cursor AI Effectively
+### Next.js
 
-### Feature Handoff
-Use the `.doc/handoff/feature-handoff.md` template when:
-- Switching between team members
-- Asking Cursor AI to analyze your codebase
-- Documenting components for future reference
-
-### Clean Code Principles
-The `.cursorrules` file contains best practices for:
-- Naming conventions
-- Code structure
-- Error handling
-- Performance optimization
-
-### Product Requirements
-Use the `PRD.md` template to:
-- Define project scope
-- Document user stories
-- Set technical requirements
-- Plan implementation phases
-
-### Feature Todo Documents
-The `.doc/todo/example-feature.md` serves as a template for creating structured task lists:
-- Copy this template when starting new features
-- Break down complex features into manageable tasks
-- Track dependencies and implementation notes
-- Use checkboxes to monitor progress
-
-#### Converting Rough Requirements to Structured Todos
-
-When you have unstructured or poorly defined requirements, use this prompt with Cursor AI to generate a structured todo document:
-
-```
-Transform these rough requirements into a structured todo document following the format in .doc/todo/example-feature.md:
-
-[Paste your rough requirements here]
-
-For the todo document:
-1. Create a clear feature title
-2. Add a concise overview of the feature's purpose
-3. Break down implementation into hierarchical tasks with checkboxes
-4. List all technical dependencies
-5. Include relevant notes about implementation challenges or considerations
-6. Make sure the tasks follow a logical implementation order
-7. Keep each task focused and specific
+```bash
+cd nextjs
+pnpm install
+cp ../.env.example .env.local
+pnpm dev
 ```
 
-This approach helps convert vague requirements like "We need user login" into comprehensive, actionable task lists organized by implementation phase.
+**Stack**: Next.js 16 + React 19 + shadcn/ui
 
-## Recommended System Prompt for Code Analysis
+### SvelteKit
+
+```bash
+cd sveltekit
+pnpm install
+cp ../.env.example .env
+pnpm dev
+```
+
+**Stack**: SvelteKit 2 + Svelte 5 (Runes) + bits-ui
+
+## Project Structure
 
 ```
-You are a code analysis assistant tasked with creating a structured handoff document. Analyze the provided codebase and generate a clear feature handoff document following this exact structure:
+vibe-starter/
+├── .claude/                # AI development guidelines
+│   ├── CLAUDE.md           # Main instructions (READ FIRST)
+│   ├── common-mistakes.md  # Anti-patterns to avoid
+│   ├── steering/           # Product, tech, structure docs
+│   ├── features/           # Feature specifications
+│   └── deps/               # Dependency documentation
+├── .env.example            # Environment variables template
+├── nextjs/                 # Next.js variant
+└── sveltekit/              # SvelteKit variant
+```
 
-For each major feature or component (limit to 5-6 features for organization):
+## Documentation
 
-### [Feature Name]
-- **Purpose**: Write a concise description of what this feature does and its role in the application
-- **Key Files**: List the most important files for this feature with brief descriptions of their responsibilities
-- **Dependencies**: Identify other components, libraries, or services this feature relies on
-- **Current Status**: Describe the current implementation state and any known issues
-- **Improvement Areas**: Note specific aspects that need enhancement based on code quality, performance, or functionality
+Read `.claude/CLAUDE.md` before starting development. It contains:
 
-Focus strictly on code analysis without adding implementation suggestions. Keep descriptions factual and concise. This document will be used by another LLM agent to implement improvements.
+- Japanese coding principles
+- Const service pattern (核心パターン)
+- File organization rules
+- Common mistakes to avoid
+
+## Quick Setup
+
+1. **Clone/copy to your project location**
+2. **Choose a framework** (nextjs or sveltekit)
+3. **Install dependencies**: `pnpm install`
+4. **Configure environment**: Copy `.env.example` to `.env.local` (Next.js) or `.env` (SvelteKit)
+5. **Start developing**: `pnpm dev`
+
+## What's Included
+
+### Both Variants
+- TailwindCSS 4 with CSS variables for theming
+- Supabase SSR clients (server + browser)
+- Utility function `cn()` for class merging
+- Type-safe environment variables
+- ESLint + Prettier configuration
+- Vitest testing setup
+- Production-ready gitignore
+
+### Next.js Specific
+- App Router with layouts
+- shadcn/ui compatible (run `pnpm dlx shadcn@latest add [component]`)
+- Server Components ready
+- Sonner toast notifications
+
+### SvelteKit Specific
+- Svelte 5 Runes reactivity
+- bits-ui components
+- Server hooks for Supabase
+- svelte-sonner for toasts
+
+## Package Versions
+
+All dependencies are pinned to latest stable versions (as of December 2025):
+
+- **Node**: >= 22.0.0
+- **PNPM**: 10.15.1
+- **TypeScript**: 5.9.x
+- **TailwindCSS**: 4.1.x
+- **Supabase**: Latest SSR packages
+
+## License
+
+MIT
