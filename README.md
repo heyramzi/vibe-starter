@@ -62,11 +62,15 @@ Read `.claude/CLAUDE.md` before starting development. It contains:
 
 ## Quick Setup
 
-1. **Clone/copy to your project location**
-2. **Choose a framework** (nextjs or sveltekit)
-3. **Install dependencies**: `pnpm install`
-4. **Configure environment**: Copy `.env.example` to `.env.local` (Next.js) or `.env` (SvelteKit)
-5. **Start developing**: `pnpm dev`
+```bash
+git clone <repo> my-project
+cd my-project
+./setup.sh nextjs   # or sveltekit
+pnpm install
+pnpm dev
+```
+
+The setup script removes the other framework, moves files to root, and creates your `.env` file.
 
 ## What's Included
 
