@@ -46,6 +46,13 @@ next-env.d.ts
 # Vercel
 .vercel
 
+# Cloudflare
+.open-next/
+.wrangler/
+
 # Supabase
 supabase/.temp/
 .cache/
+
+# Database backups (remove this line in private repos to enable backup commits)
+backups/

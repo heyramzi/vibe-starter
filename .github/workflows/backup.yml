@@ -1,0 +1,33 @@
+# Automated Supabase Database Backup
+#
+# IMPORTANT: Only enable on PRIVATE repositories!
+# Database backups contain sensitive data.
+#
+# Setup:
+# 1. Ensure your repository is PRIVATE
+# 2. Add secret: SUPABASE_DB_URL (Settings → Secrets → Actions)
+#    Format: postgresql://postgres:[PASSWORD]@db.[REF].supabase.co:5432/postgres
+# 3. Remove 'backups/' from .gitignore if present
+#
+# Backups are stored in ./backups/ with automatic retention cleanup.
+
+name: Database Backup
+
+on:
+  # Run every 3 days at 3 AM UTC (staggered from other projects)
+  schedule:
+    - cron: '0 3 */3 * *'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  backup:
+    uses: heyramzi/studio-utils/.github/workflows/supabase-backup.yml@main
+    with:
+      backup-retention: 5      # Keep last 5 backups (15 days of history)
+      backup-dir: 'backups'    # Store in ./backups/
+      include-roles: true      # Include database roles
+      compress: false          # No compression (faster restore)
+    secrets:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
