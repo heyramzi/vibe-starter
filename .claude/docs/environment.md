@@ -26,3 +26,17 @@ NEXT_PUBLIC_APP_URL=                    # or PUBLIC_APP_URL for SvelteKit
 Get keys: Supabase Dashboard → Settings → API Keys
 
 **Never commit `.env.local` or expose secret keys in client code**
+
+## Email (Unosend)
+
+```bash
+UNOSEND_API_KEY=un_...  # Server only
+```
+
+| Key Type | Format | Use |
+|----------|--------|-----|
+| API Key | `un_...` | Server only, never client |
+
+Get key: [Unosend Dashboard](https://www.unosend.co) → API Keys
+
+See: [`deps/unosend.md`](../deps/unosend.md) for usage examples
