@@ -31,6 +31,7 @@ AI agent instructions for vibe-starter. Read relevant docs below based on your t
 │   └── structure.md          # Project structure patterns
 ├── features/                 # Feature specifications (one .md per feature)
 └── deps/                     # Dependency documentation
+    └── unosend.md            # Email service (SMTP)
 ```
 
 ## When to Read What
