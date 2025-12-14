@@ -18,8 +18,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "cf:preview": "vite build && wrangler pages dev .svelte-kit/cloudflare",
-    "cf:deploy": "vite build && wrangler pages deploy .svelte-kit/cloudflare --project-name=vibe-starter-sveltekit"
+    "cf:preview": "vite build && wrangler dev",
+    "cf:deploy": "vite build && wrangler deploy"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
