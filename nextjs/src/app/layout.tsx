@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Toaster } from 'sonner'
+import { UmamiScript } from '@/components/analytics'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function RootLayout({
       <body className="antialiased">
         {children}
         <Toaster />
+        <UmamiScript />
       </body>
     </html>
   )
