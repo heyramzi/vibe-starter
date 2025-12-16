@@ -126,8 +126,22 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.15 0 0);
+
+  /* Upsys Brand Colors */
+  --upsys-purple: oklch(0.58 0.14 272.32);
+  --upsys-purple-light: oklch(0.75 0.12 272.32);
+  --upsys-blue: oklch(0.75 0.13 218.02);
+  --upsys-magenta: oklch(0.64 0.33 328.36);
+
+  /* Gray Scale */
+  --gray-50: oklch(0.98 0 0);
+  --gray-100: oklch(0.94 0 0);
+  --gray-300: oklch(0.84 0 0);
+  --gray-500: oklch(0.65 0 0);
+  --gray-700: oklch(0.45 0 0);
+  --gray-900: oklch(0.15 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -200,4 +214,58 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Upsys Brand Button - Rotating Glow Effect */
+.btn-glow {
+  background:
+    linear-gradient(var(--gray-900), var(--gray-900)) padding-box,
+    conic-gradient(
+      from var(--glow-angle, 0deg),
+      transparent 0deg,
+      oklch(0.64 0.33 328.36) 40deg,
+      oklch(0.58 0.14 272.32) 140deg,
+      oklch(0.75 0.13 218.02) 240deg,
+      transparent 360deg
+    ) border-box;
+  border: 1.5px solid transparent;
+  color: var(--gray-50);
+}
+
+.dark .btn-glow {
+  background:
+    linear-gradient(var(--gray-50), var(--gray-50)) padding-box,
+    conic-gradient(
+      from var(--glow-angle, 0deg),
+      transparent 0deg,
+      oklch(0.64 0.33 328.36) 40deg,
+      oklch(0.58 0.14 272.32) 140deg,
+      oklch(0.75 0.13 218.02) 240deg,
+      transparent 360deg
+    ) border-box;
+  color: var(--gray-900);
+}
+
+/* Container utilities matching Upsys */
+.container-marketing {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.container-marketing-small {
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Glass effect */
+.glass {
+  backdrop-filter: blur(12px);
+  background-color: color-mix(in oklch, var(--background) 80%, transparent);
+  border: 1px solid color-mix(in oklch, var(--border) 40%, transparent);
 }
