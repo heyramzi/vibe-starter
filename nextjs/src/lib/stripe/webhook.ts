@@ -2,6 +2,8 @@ import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe/client'
 import { createServerClient } from '@/lib/supabase'
 import type { SubscriptionStatus } from '@/lib/stripe/types'
+import { pricingPlans } from '@/lib/stripe/plans'
+import { EmailService } from '@/lib/email'
 
 // Map Stripe status to our status
 function mapStatus(status: Stripe.Subscription.Status): SubscriptionStatus {
@@ -16,6 +18,31 @@ function mapStatus(status: Stripe.Subscription.Status): SubscriptionStatus {
     unpaid: 'past_due',
   }
   return statusMap[status] || 'inactive'
+}
+
+// Get customer email from Stripe
+async function getCustomerEmail(customerId: string | Stripe.Customer | Stripe.DeletedCustomer | null): Promise<string | null> {
+  if (!customerId) return null
+  if (typeof customerId !== 'string') {
+    return 'deleted' in customerId ? null : customerId.email
+  }
+  const customer = await stripe.customers.retrieve(customerId)
+  return 'deleted' in customer ? null : customer.email
+}
+
+// Get plan name from price ID
+function getPlanName(priceId: string): string {
+  for (const plan of pricingPlans) {
+    if (plan.prices.month.id === priceId || plan.prices.year.id === priceId) {
+      return plan.name
+    }
+  }
+  return 'Plan'
+}
+
+// Send email without blocking webhook (fire-and-forget)
+function sendEmailAsync(fn: () => Promise<unknown>) {
+  fn().catch((err) => console.error('Email send failed:', err))
 }
 
 // Sync subscription data to database
@@ -50,11 +77,32 @@ export const WebhookHandler = {
         if (session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
           await syncSubscription(subscription)
+
+          // Send subscription created email
+          const email = await getCustomerEmail(session.customer)
+          const priceId = subscription.items.data[0]?.price.id
+          if (email && priceId) {
+            const planName = getPlanName(priceId)
+            sendEmailAsync(() => EmailService.sendSubscriptionCreated(email, planName))
+          }
         }
         break
       }
 
-      case 'customer.subscription.updated':
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription
+        await syncSubscription(subscription)
+
+        // Send subscription updated email
+        const email = await getCustomerEmail(subscription.customer)
+        const priceId = subscription.items.data[0]?.price.id
+        if (email && priceId) {
+          const planName = getPlanName(priceId)
+          sendEmailAsync(() => EmailService.sendSubscriptionUpdated(email, planName))
+        }
+        break
+      }
+
       case 'customer.subscription.created': {
         const subscription = event.data.object as Stripe.Subscription
         await syncSubscription(subscription)
@@ -73,6 +121,15 @@ export const WebhookHandler = {
               stripe_subscription_id: null,
             })
             .eq('id', organizationId)
+
+          // Send subscription cancelled email
+          const email = await getCustomerEmail(subscription.customer)
+          const subscriptionItem = subscription.items.data[0]
+          if (email && subscriptionItem) {
+            const planName = getPlanName(subscriptionItem.price.id)
+            const endDate = new Date(subscriptionItem.current_period_end * 1000).toLocaleDateString()
+            sendEmailAsync(() => EmailService.sendSubscriptionCancelled(email, planName, endDate))
+          }
         }
         break
       }
@@ -90,6 +147,14 @@ export const WebhookHandler = {
               .from('organizations')
               .update({ subscription_status: 'past_due' })
               .eq('id', organizationId)
+
+            // Send payment failed email
+            const email = await getCustomerEmail(subscription.customer)
+            const priceId = subscription.items.data[0]?.price.id
+            if (email && priceId) {
+              const planName = getPlanName(priceId)
+              sendEmailAsync(() => EmailService.sendPaymentFailed(email, planName))
+            }
           }
         }
         break

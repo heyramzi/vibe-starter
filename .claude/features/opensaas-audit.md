@@ -1,7 +1,7 @@
 # OpenSaaS Feature Audit for Vibe-Starter
 
 _Audit Date: December 2024_
-_Last Updated: December 2024_
+_Last Updated: December 14, 2024_
 
 This document catalogs features from [OpenSaaS](https://opensaas.sh/) that could enhance Vibe-Starter while maintaining our 簡潔 (simplicity) philosophy.
 
@@ -15,13 +15,13 @@ OpenSaaS is a feature-complete SaaS starter built on Wasp (React/Node/Prisma). W
 
 | Priority | Feature | Effort | Value | Status |
 |----------|---------|--------|-------|--------|
-| **P0** | Auth Flows (UI) | Medium | High | Pending |
+| ~~P0~~ | ~~Auth Flows (UI)~~ | ~~Medium~~ | ~~High~~ | **COMPLETE** |
 | ~~P0~~ | ~~Stripe Integration~~ | ~~High~~ | ~~High~~ | **OURS IS BETTER** |
 | **P1** | Admin Dashboard | Medium | High | Pending |
-| **P1** | Landing Page Templates | Low | High | Pending |
-| **P1** | Email Service | Low | Medium | Pending |
-| **P2** | Analytics Integration | Low | Medium | Pending |
-| **P2** | File Upload (S3) | Medium | Medium | Pending |
+| ~~P1~~ | ~~Landing Page Templates~~ | ~~Low~~ | ~~High~~ | **COMPLETE** |
+| ~~P1~~ | ~~Email Service~~ | ~~Low~~ | ~~Medium~~ | **COMPLETE** |
+| ~~P2~~ | ~~Analytics Integration~~ | ~~Low~~ | ~~Medium~~ | **COMPLETE** (Umami) |
+| ~~P2~~ | ~~File Upload (Supabase Storage)~~ | ~~Medium~~ | ~~Medium~~ | **COMPLETE** |
 | **P3** | Cookie Consent | Low | Low | Pending |
 | **P3** | AI Demo App | Medium | Low | Pending |
 
@@ -95,38 +95,30 @@ If needed later:
 
 ## Feature Deep Dives
 
-### 1. Authentication System
+### 1. Authentication System ✅ COMPLETE
 
-**What OpenSaaS Has:**
-- Email/password with verification flow
-- Social auth: Google, GitHub, Discord OAuth
-- Session management (automatic)
-- Pre-built auth UI components
-- Admin role system (`isAdmin` flag)
-
-**What We Have:**
-- Supabase Auth configured (client/server)
-- No pre-built auth UI pages
-
-**Recommendation:**
+**What We Implemented:**
 ```
-Add to Vibe-Starter:
-├── src/app/(auth)/
-│   ├── login/page.tsx           # Email + social login
-│   ├── signup/page.tsx          # Registration with email verification
-│   ├── forgot-password/page.tsx # Password reset flow
-│   ├── reset-password/page.tsx  # Token-based reset
-│   └── verify-email/page.tsx    # Email confirmation
-├── src/components/auth/
-│   ├── LoginForm.tsx
-│   ├── SignupForm.tsx
-│   ├── SocialAuthButtons.tsx    # Google, GitHub, Discord
-│   └── AuthCard.tsx             # Shared layout wrapper
-└── src/lib/auth/
-    └── guards.ts                # Auth middleware helpers
+src/app/(auth)/
+├── layout.tsx                   # Auth layout wrapper
+├── login/page.tsx               # Email + Google OAuth
+├── signup/page.tsx              # Registration with OTP verification
+└── verify/page.tsx              # Email verification
+
+src/components/auth/
+├── AuthCard.tsx                 # Shared layout wrapper
+├── AuthDivider.tsx              # "or" divider
+├── GoogleButton.tsx             # Google OAuth button
+├── OTPForm.tsx                  # OTP input form
+├── OTPVerify.tsx                # OTP verification flow
+└── index.ts                     # Barrel export
 ```
 
-**Supabase Advantage:** We get email verification, password reset, and social auth for free - just need UI.
+**Features:**
+- Email/password with OTP verification
+- Google OAuth integration
+- Supabase Auth (session management automatic)
+- Clean, reusable auth components
 
 ---
 
@@ -172,156 +164,114 @@ Add to Vibe-Starter:
 
 ---
 
-### 3. Landing Page Templates
+### 3. Landing Page Templates ✅ COMPLETE
 
-**What OpenSaaS Has:**
+**What We Implemented:**
+```
+src/app/(marketing)/
+├── layout.tsx                   # Marketing layout
+└── page.tsx                     # Landing page
+
+src/components/landing/
+├── Hero.tsx                     # Hero section
+├── Features.tsx                 # Feature highlights
+├── HowItWorks.tsx               # How it works section
+├── CTA.tsx                      # Call-to-action section
+├── GlowButton.tsx               # Animated glow button
+└── index.ts                     # Barrel export
+```
+
+**Features:**
 - Section-based landing page architecture
-- Components:
-  - Hero section
-  - Feature highlights
-  - Pricing section
-  - Testimonials
-  - FAQ section
-  - CTA sections
-- Logo showcase
-- Content sections system
-
-**Recommendation:**
-```
-Add to Vibe-Starter:
-├── src/app/(marketing)/
-│   ├── page.tsx                 # Landing page
-│   └── about/page.tsx           # About page
-├── src/components/landing/
-│   ├── Hero.tsx
-│   ├── Features.tsx
-│   ├── FeatureCard.tsx
-│   ├── Testimonials.tsx
-│   ├── FAQ.tsx
-│   ├── CTA.tsx
-│   ├── LogoCloud.tsx
-│   └── Footer.tsx
-└── src/lib/landing/
-    └── content.ts               # Content configuration
-```
-
-**Note:** Pricing page already implemented at `/pricing`.
+- Pricing page at `/pricing` (from Stripe implementation)
+- Clean, reusable landing components
+- Animated UI elements (GlowButton)
 
 ---
 
-### 4. Email Service
+### 4. Email Service ✅ COMPLETE
 
-**What OpenSaaS Has:**
-- Provider abstraction (SendGrid, Mailgun, SMTP)
-- Simple send API
-- Transactional email examples (subscription events)
-
-**What We Have:**
-- unosend documented in deps
-
-**Recommendation:**
+**What We Implemented:**
 ```
-Add to Vibe-Starter:
-├── src/lib/email/
-│   ├── client.ts                # Email provider setup
-│   ├── templates/
-│   │   ├── welcome.tsx          # React Email template
-│   │   ├── password-reset.tsx
-│   │   ├── subscription.tsx
-│   │   └── base.tsx             # Base layout
-│   └── send.ts                  # Unified send function
-└── src/app/api/email/
-    └── send/route.ts            # API endpoint (if needed)
+src/lib/email/
+├── client.ts                    # Unosend email client setup
+├── types.ts                     # Email type definitions
+├── templates/                   # React Email templates
+│   ├── base.tsx
+│   ├── welcome.tsx
+│   ├── password-reset.tsx
+│   └── subscription.tsx
+└── index.ts                     # Barrel export
 ```
 
-**Implementation Pattern:**
-```typescript
-// src/lib/email/send.ts
-export const EmailService = {
-  async send(options: EmailOptions) {
-    // Uses unosend or Resend
-  },
-
-  async sendWelcome(user: User) {
-    return this.send({
-      to: user.email,
-      subject: 'Welcome!',
-      react: WelcomeEmail({ user })
-    })
-  },
-
-  async sendPasswordReset(email: string, token: string) {
-    // ...
-  }
-}
-```
+**Features:**
+- Unosend integration (SMTP-based)
+- React Email templates for transactional emails
+- Const service pattern for email operations
+- Welcome, password reset, and subscription email templates
 
 ---
 
-### 5. Analytics Integration
+### 5. Analytics Integration ✅ COMPLETE
 
-**What OpenSaaS Has:**
-- Plausible (privacy-focused, no cookies)
-- Google Analytics (with cookie consent)
-- Dashboard integration for page views
-- Background job fetching analytics data
+**What We Implemented:**
+```
+src/lib/analytics/
+├── umami.ts                     # Umami analytics client
+└── index.ts                     # Barrel export
 
-**Recommendation:**
+src/components/analytics/
+└── AnalyticsProvider.tsx        # Client-side tracking (if needed)
 ```
-Add to Vibe-Starter:
-├── src/lib/analytics/
-│   ├── plausible.ts             # Plausible client
-│   ├── google.ts                # GA4 client (optional)
-│   └── index.ts                 # Unified tracking API
-├── src/components/analytics/
-│   └── AnalyticsProvider.tsx    # Client-side tracking
-└── src/app/api/analytics/
-    └── stats/route.ts           # Fetch stats for admin
-```
+
+**Features:**
+- Umami integration (privacy-focused, no cookies)
+- Self-hosted or cloud option
+- Simple tracking API
+- GDPR-compliant (no cookie consent needed)
 
 **Environment Variables:**
 ```env
-# Analytics
-NEXT_PUBLIC_PLAUSIBLE_DOMAIN=your-domain.com
-PLAUSIBLE_API_KEY=your-api-key
-
-# Optional: Google Analytics
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+NEXT_PUBLIC_UMAMI_WEBSITE_ID=your-website-id
+NEXT_PUBLIC_UMAMI_URL=https://your-umami-instance.com
 ```
 
 ---
 
-### 6. File Upload (S3)
+### 6. File Upload (Supabase Storage) ✅ COMPLETE
 
-**What OpenSaaS Has:**
-- S3 presigned URL pattern
-- User-scoped file storage (`user-{id}/`)
-- File entity tracking in database
-- Download URL generation
-- Orphaned file cleanup job
-
-**Recommendation:**
+**What We Implemented:**
 ```
-Add to Vibe-Starter:
-├── src/lib/storage/
-│   ├── s3.ts                    # S3 client + presigned URLs
-│   ├── supabase-storage.ts      # Alternative: Supabase Storage
-│   └── index.ts                 # Unified storage API
-├── src/components/upload/
-│   ├── FileUpload.tsx           # Drag-drop uploader
-│   ├── FileList.tsx             # User's files
-│   └── FilePreview.tsx          # Preview component
-└── src/app/api/storage/
-    ├── upload-url/route.ts      # Get presigned upload URL
-    └── download-url/route.ts    # Get presigned download URL
+src/lib/storage/
+├── storage-service.ts           # StorageService const
+├── types.ts                     # Type definitions
+└── index.ts                     # Barrel export
 ```
 
-**Supabase Alternative:**
-Supabase Storage provides similar functionality with simpler setup:
-- Built-in presigned URLs
-- RLS policies for access control
-- No AWS credentials needed
-- Transformations for images
+**Features:**
+- Supabase Storage (S3-compatible)
+- User-scoped paths (`user-{id}/`)
+- Org-scoped paths (`org-{id}/`)
+- Signed URL generation for private files
+- Public URL for public bucket
+- Upload, download, list, delete, move, copy operations
+- Follows const service pattern
+
+**Usage:**
+```typescript
+import { StorageService } from '@/lib/storage'
+
+// Upload for user
+const result = await StorageService.uploadForUser(userId, file, 'doc.pdf')
+
+// Get signed URL (private)
+const url = await StorageService.getSignedUrl('user-123/doc.pdf')
+
+// List user files
+const files = await StorageService.listForUser(userId)
+```
+
+**Note:** UI components (FileUpload, FileList) can be added per-project as needed
 
 ---
 
@@ -373,21 +323,21 @@ Add to Vibe-Starter (optional):
 
 ## Implementation Roadmap
 
-### Phase 1: Foundation (P0)
+### Phase 1: Foundation (P0) ✅ COMPLETE
 1. ~~**Stripe Integration**~~ - **COMPLETE** (ours is better)
-2. **Auth UI Pages** - Login, signup, password reset
+2. ~~**Auth UI Pages**~~ - **COMPLETE** (login, signup, verify with OTP)
 
-### Phase 2: Growth Tools (P1)
-3. **Landing Page** - Hero, features, FAQ
-4. **Admin Dashboard** - Stats, user management
-5. **Email Templates** - Welcome, transactional
+### Phase 2: Growth Tools (P1) ✅ MOSTLY COMPLETE
+3. ~~**Landing Page**~~ - **COMPLETE** (Hero, Features, HowItWorks, CTA)
+4. **Admin Dashboard** - Pending (stats, user management)
+5. ~~**Email Templates**~~ - **COMPLETE** (Unosend + React Email)
 
-### Phase 3: Enhancements (P2)
-6. **Analytics** - Plausible integration
-7. **File Storage** - Supabase Storage or S3
+### Phase 3: Enhancements (P2) ✅ COMPLETE
+6. ~~**Analytics**~~ - **COMPLETE** (Umami integration)
+7. ~~**File Storage**~~ - **COMPLETE** (Supabase Storage)
 
 ### Phase 4: Optional (P3)
-8. **Cookie Consent** - If using GA
+8. **Cookie Consent** - Not needed (Umami is cookie-free)
 9. **AI Demo** - If relevant to product
 
 ---
@@ -409,36 +359,34 @@ While adopting features, maintain these strengths:
 ## Files to Create Summary
 
 ```
-Remaining Files: ~35-40 files
+Remaining Files: ~9 files (optional)
 
-High Priority (P0-P1):
-├── Auth pages (5 pages)
-├── Auth components (4 components)
-├── Admin dashboard (6 pages)
-├── Landing components (8 components)
-├── Email service (5 files)
-└── Supporting lib files (~8 files)
-
-Medium Priority (P2):
-├── Analytics integration (4 files)
-└── Storage service (6 files)
+High Priority (P1):
+└── Admin dashboard (6 pages/components) - deferred
 
 Low Priority (P3):
-├── Cookie consent (3 files)
-└── AI demo (4 files)
+└── AI demo (4 files) - optional per-project
+
+COMPLETED:
+├── Auth pages (4 pages) ✅
+├── Auth components (6 components) ✅
+├── Landing components (6 components) ✅
+├── Email service (5+ files) ✅
+├── Analytics (2 files) ✅
+└── Storage service (3 files) ✅
 ```
 
 ---
 
-## Decision Points for User
+## Decision Points — Resolved
 
-Before implementation, clarify:
-
-1. ~~**Payment Provider**~~: Stripe only (decided - ours is better)
-2. **Analytics**: Plausible (simpler, privacy) or Google Analytics?
-3. **File Storage**: Supabase Storage (simpler) or AWS S3 (more control)?
-4. **Email Provider**: Resend, SendGrid, or stick with unosend?
-5. **Which variant first**: Next.js or SvelteKit?
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| ~~Payment Provider~~ | Stripe | Ours is architecturally superior |
+| ~~Analytics~~ | **Umami** | Privacy-focused, self-hostable, no cookies |
+| ~~File Storage~~ | **Supabase Storage** | S3-compatible, RLS policies, simpler setup |
+| ~~Email Provider~~ | **Unosend** | SMTP-based, documented in deps |
+| Variant priority | Next.js first | SvelteKit follows same patterns |
 
 ---
 
