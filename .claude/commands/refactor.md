@@ -1,6 +1,6 @@
 # Refactor: $ARGUMENTS
 
-Read and follow the refactoring skill at `.claude/skills/code-refactoring/SKILL.md`.
+Read and follow the refactoring skill at `.claude/skills/code-refactoring.md`.
 
 ## Target
 $ARGUMENTS
