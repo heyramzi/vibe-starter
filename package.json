@@ -1,5 +1,6 @@
 {
 	"name": "vibe-starter-validators",
+	"version": "0.1.0",
 	"description": "Shared code quality validators for vibe-starter projects",
 	"scripts": {
 		"lint:sections": "tsx scripts/validate-sections.ts",
