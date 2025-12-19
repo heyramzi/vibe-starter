@@ -62,7 +62,7 @@ AFTER refactoring, verify:
 | Unused code | Delete immediately |
 | Inconsistent patterns | Align with project conventions |
 | Helper sprawl | Consolidate to const service pattern |
-| Relative imports | Convert to `@/` absolute imports |
+| Relative imports | Convert to `@/` or `$lib/` absolute imports |
 
 ---
 
@@ -94,7 +94,7 @@ For each issue, determine:
 
 ```markdown
 1. Make ONE atomic change
-2. Run type check: pnpm exec tsc --noEmit
+2. Run type check: pnpm exec tsc --noEmit (Next.js) or pnpm check (SvelteKit)
 3. Run tests if applicable
 4. Verify change is correct
 5. Repeat for next change
@@ -127,7 +127,7 @@ Based on this codebase's conventions:
 - [ ] Single responsibility per file/function
 
 ### Style
-- [ ] `@/` imports only (no relative paths)
+- [ ] `@/` or `$lib/` imports only (no relative paths)
 - [ ] Single-line comments for "why" not "what"
 - [ ] No redundant fallbacks in props
 - [ ] No verbose JSDoc for obvious code
@@ -224,6 +224,107 @@ function Card({ size = 'md' }: Props) {
 
 ---
 
+## Legacy Patterns (Technical Debt)
+
+**Philosophy**: 無借金経営 (Mushakkin Keiei) - Zero Technical Debt
+
+Legacy code is debt. The longer it stays, the more it spreads.
+
+### Detection Checklist
+
+| Pattern | Example | Fix |
+|---------|---------|-----|
+| Redundant fallbacks | `const x = prop \|\| 'default'` after default in props | Remove fallback |
+| Backward compatibility aliases | `export { New as Old }` | Update all refs, delete alias |
+| Type assertions | `data as SomeType` hiding schema mismatch | Fix schema or types |
+| Dual field access | `data.newField ?? data.oldField` | Migrate data, use single field |
+| Dead code | Commented blocks, unreachable conditionals | Delete immediately |
+| Optional chaining abuse | `user?.name` when user is guaranteed | Remove `?` |
+
+### Framework-Specific Legacy
+
+**SvelteKit (Svelte 4 → Svelte 5):**
+```svelte
+<!-- LEGACY -->
+<script>
+  export let count = 0        // Old props
+  $: doubled = count * 2      // Reactive declaration
+</script>
+
+<!-- MODERN -->
+<script lang="ts">
+  let { count = 0 }: Props = $props()
+  const doubled = $derived(count * 2)
+</script>
+```
+
+**Next.js (Pages → App Router):**
+```typescript
+// LEGACY
+export async function getServerSideProps() { ... }
+
+// MODERN
+// In app/ directory with server components
+export default async function Page() { ... }
+```
+
+### Legacy Cleanup Recipes
+
+#### Recipe: Remove Redundant Fallback
+```typescript
+// BEFORE
+let { size = 'md' }: Props = $props()
+const finalSize = size || 'md'  // Redundant!
+
+// AFTER
+let { size = 'md' }: Props = $props()
+// Use size directly - default handles undefined
+```
+
+#### Recipe: Remove Backward Compatibility Alias
+```typescript
+// STEP 1: Find all imports
+grep -rn "OldName" src/
+
+// STEP 2: Update each to new name
+import { NewName } from '$lib/components'
+
+// STEP 3: Delete the alias from exports
+// Remove: export { NewName as OldName }
+```
+
+#### Recipe: Fix Type Assertion
+```typescript
+// BEFORE - hiding schema mismatch
+const sales = portal.sales_data as SalesData
+
+// AFTER - proper types from schema
+// 1. Verify column exists in database
+// 2. Regenerate types: pnpm supabase gen types
+// 3. Use directly without assertion
+const sales = portal.sales_data
+```
+
+### Search Commands
+
+```bash
+# Find redundant fallbacks
+grep -rn "|| '" src/ --include="*.ts" --include="*.svelte"
+
+# Find type assertions
+grep -rn "as any" src/
+grep -rn "as unknown" src/
+
+# Find Svelte 4 patterns
+grep -rn "export let" src/ --include="*.svelte"
+grep -rn "^\s*\$:" src/ --include="*.svelte"
+
+# Find TODO comments
+grep -rn "TODO" src/
+```
+
+---
+
 ## Common Mistakes During Refactoring
 
 | Mistake | Why It's Wrong | Correct Approach |
@@ -242,8 +343,11 @@ function Card({ size = 'md' }: Props) {
 After refactoring, always verify:
 
 ```bash
-# Type check
+# Type check (Next.js)
 pnpm exec tsc --noEmit
+
+# Type check (SvelteKit)
+pnpm check
 
 # Tests (if applicable)
 pnpm test
