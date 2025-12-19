@@ -1,0 +1,13 @@
+{
+	"name": "vibe-starter-validators",
+	"description": "Shared code quality validators for vibe-starter projects",
+	"scripts": {
+		"lint:sections": "tsx scripts/validate-sections.ts",
+		"lint:mistakes": "tsx scripts/validate-common-mistakes.ts",
+		"lint:structure": "tsx scripts/validate-structure.ts",
+		"lint:all": "tsx scripts/validate-sections.ts && tsx scripts/validate-common-mistakes.ts && tsx scripts/validate-structure.ts"
+	},
+	"devDependencies": {
+		"tsx": "^4.21.0"
+	}
+}
