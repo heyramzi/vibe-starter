@@ -7,6 +7,10 @@
     "shadcn-svelte": {
       "command": "npx",
       "args": ["shadcn-svelte@next", "mcp"]
+    },
+    "svelte": {
+      "type": "http",
+      "url": "https://mcp.svelte.dev/mcp"
     }
   }
 }
