@@ -30,6 +30,9 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.39.1
+        version: 9.39.1
       '@internationalized/date':
         specifier: ^3.10.0
         version: 3.10.0
