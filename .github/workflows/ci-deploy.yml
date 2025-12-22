@@ -108,7 +108,8 @@ jobs:
     if: |
       always() &&
       (needs.ci.result == 'success' || github.event.inputs.skip_ci == 'true') &&
-      (github.ref == 'refs/heads/main' || github.event.inputs.nextjs_project_name != '')
+      (github.ref == 'refs/heads/main' || github.event.inputs.nextjs_project_name != '') &&
+      vars.ENABLE_DEPLOY == 'true'
 
     defaults:
       run:
@@ -158,7 +159,8 @@ jobs:
     if: |
       always() &&
       (needs.ci.result == 'success' || github.event.inputs.skip_ci == 'true') &&
-      (github.ref == 'refs/heads/main' || github.event.inputs.sveltekit_project_name != '')
+      (github.ref == 'refs/heads/main' || github.event.inputs.sveltekit_project_name != '') &&
+      vars.ENABLE_DEPLOY == 'true'
 
     defaults:
       run:
