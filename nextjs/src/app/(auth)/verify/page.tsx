@@ -1,10 +1,11 @@
 "use client"
 
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { AuthCard, OTPVerify } from "@/components/auth"
 
-export default function VerifyPage() {
+function VerifyContent() {
   const searchParams = useSearchParams()
   const email = searchParams.get("email")
   const next = searchParams.get("next") ?? "/dashboard"
@@ -26,5 +27,13 @@ export default function VerifyPage() {
     <AuthCard title="Check your email" description="We sent you a verification code">
       <OTPVerify email={email} redirectTo={next} />
     </AuthCard>
+  )
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<AuthCard title="Loading..." description="Please wait"><div /></AuthCard>}>
+      <VerifyContent />
+    </Suspense>
   )
 }
