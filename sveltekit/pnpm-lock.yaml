@@ -20,6 +20,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      creem_io:
+        specifier: ^0.4.0
+        version: 0.4.0
       lucide-svelte:
         specifier: ^0.555.0
         version: 0.555.0(svelte@5.45.5)
@@ -1464,6 +1467,10 @@ packages:
   cookie@1.1.1:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
     engines: {node: '>=18'}
+
+  creem_io@0.4.0:
+    resolution: {integrity: sha512-zw5CFxSb5RPHSphxP5fo5bZa79M84XisXZeORjFFhWwgdzL/JuS4hv+Xsnr8tIRAG2QBKdAQ0Pc4XQdn5+t4VQ==}
+    engines: {node: '>=16.0.0'}
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -4025,6 +4032,8 @@ snapshots:
   cookie@0.6.0: {}
 
   cookie@1.1.1: {}
+
+  creem_io@0.4.0: {}
 
   cross-spawn@7.0.6:
     dependencies:
