@@ -82,6 +82,7 @@ jobs:
       - name: Build for E2E
         run: pnpm build
         env:
+          SKIP_ENV_VALIDATION: true
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'placeholder-key' }}
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
