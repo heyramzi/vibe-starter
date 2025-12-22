@@ -1,5 +1,3 @@
-import { goto } from '$app/navigation'
-
 export interface CheckoutParams {
 	productId: string
 	referenceId: string
@@ -25,7 +23,7 @@ export async function createCheckout(params: CheckoutParams): Promise<void> {
 	}
 
 	const { url } = await response.json()
-	await goto(url, { replaceState: false })
+	window.location.href = url
 }
 
 export async function openPortal(params: PortalParams): Promise<void> {
@@ -41,5 +39,5 @@ export async function openPortal(params: PortalParams): Promise<void> {
 	}
 
 	const { url } = await response.json()
-	await goto(url, { replaceState: false })
+	window.location.href = url
 }
