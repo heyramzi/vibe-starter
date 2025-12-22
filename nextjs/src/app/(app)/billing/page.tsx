@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { CheckCircle, XCircle, CreditCard, ExternalLink } from 'lucide-react'
+import { CheckCircle, XCircle, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
