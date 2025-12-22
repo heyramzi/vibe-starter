@@ -65,6 +65,10 @@ jobs:
 
       - name: Type check
         run: ${{ matrix.type-check }}
+        env:
+          # SvelteKit needs these for $env/static/public type generation
+          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'placeholder-key' }}
 
       - name: Lint
         run: pnpm lint
