@@ -4,7 +4,7 @@ import { env } from '$env/dynamic/public'
 
 export async function POST({ request, locals }: RequestEvent) {
 	// Optional: require authentication
-	const { session, user } = await locals.safeGetSession()
+	const { user } = await locals.safeGetSession()
 	if (!user) {
 		throw error(401, 'Unauthorized')
 	}
