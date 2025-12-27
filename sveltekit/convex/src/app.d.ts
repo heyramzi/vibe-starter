@@ -1,17 +1,15 @@
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
+import type { ConvexHttpClient } from "convex/browser"
+
 declare global {
   namespace App {
     // interface Error {}
     interface Locals {
-      supabase: import('@supabase/supabase-js').SupabaseClient
-      safeGetSession: () => Promise<{
-        session: import('@supabase/supabase-js').Session | null
-        user: import('@supabase/supabase-js').User | null
-      }>
+      convex: ConvexHttpClient
     }
     interface PageData {
-      session: import('@supabase/supabase-js').Session | null
+      user: { id: string; email: string } | null
     }
     // interface PageState {}
     // interface Platform {}

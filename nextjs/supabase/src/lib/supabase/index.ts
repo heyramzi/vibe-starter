@@ -3,3 +3,4 @@
 // Use client.ts for Client Components
 export { createClient as createServerClient } from './server'
 export { createClient as createBrowserClient } from './client'
+export { SupabaseAuth } from './auth'
