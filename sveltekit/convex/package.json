@@ -1,7 +1,7 @@
 {
   "name": "vibe-starter-sveltekit",
   "version": "1.0.0",
-  "description": "SvelteKit starter with Supabase, TailwindCSS, and TypeScript",
+  "description": "SvelteKit starter with Convex, TailwindCSS, and TypeScript",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,8 +22,9 @@
     "cf:deploy": "vite build && wrangler deploy"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.86.0",
+    "convex": "^1.21.0",
+    "convex-svelte": "^0.0.8",
+    "@convex-dev/auth": "^0.0.80",
     "bits-ui": "^2.14.4",
     "clsx": "^2.1.1",
     "creem_io": "^0.4.0",
