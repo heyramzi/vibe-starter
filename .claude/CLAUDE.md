@@ -24,13 +24,15 @@ AI agent instructions for vibe-starter. Read relevant docs below based on your t
 │   ├── patterns.md           # Const service pattern, data flow
 │   ├── commands.md           # Development commands & workflow
 │   ├── file-conventions.md   # Types, imports, folder rules
-│   └── environment.md        # Env vars, Supabase keys
+│   └── environment.md        # Env vars
 ├── steering/
 │   ├── product.md            # Product vision & goals
 │   ├── tech.md               # Technical architecture
 │   └── structure.md          # Project structure patterns
 ├── features/                 # Feature specifications (one .md per feature)
 └── deps/                     # Dependency documentation
+    ├── supabase.md           # Supabase integration
+    ├── convex.md             # Convex integration
     └── unosend.md            # Email service (SMTP)
 ```
 
@@ -45,11 +47,14 @@ AI agent instructions for vibe-starter. Read relevant docs below based on your t
 | Setting up env | `docs/environment.md` |
 | Understanding architecture | `steering/tech.md`, `steering/structure.md` |
 | Product context | `steering/product.md` |
+| Using Supabase | `deps/supabase.md` |
+| Using Convex | `deps/convex.md` |
 
 ## Tech Stack
 
 **Core**: Next.js 16 or SvelteKit 2 + TypeScript 5.x + TailwindCSS 4.x
-**Database**: Supabase (PostgreSQL)
+**Database**: Supabase (PostgreSQL) OR Convex (Document DB)
+**Auth**: Email OTP (both backends)
 **Package Manager**: PNPM 10.x
 **Node**: >= 22.0.0
 
@@ -57,10 +62,17 @@ AI agent instructions for vibe-starter. Read relevant docs below based on your t
 
 ```
 vibe-starter/
-├── .claude/          # AI documentation (shared)
-├── .env.example      # Environment template
-├── nextjs/           # Next.js variant
-└── sveltekit/        # SvelteKit variant
+├── .claude/              # AI documentation (shared)
+├── .mcp.json             # MCP server config (Convex)
+├── .env.example.supabase # Supabase env template
+├── .env.example.convex   # Convex env template
+├── setup.sh              # 4-variant setup script
+├── nextjs/
+│   ├── supabase/         # Next.js + Supabase
+│   └── convex/           # Next.js + Convex
+└── sveltekit/
+    ├── supabase/         # SvelteKit + Supabase
+    └── convex/           # SvelteKit + Convex
 ```
 
 Each variant follows:
@@ -71,7 +83,8 @@ src/
 │   ├── ui/           # Reusable UI components
 │   └── [feature]/    # Feature-specific components
 ├── lib/              # ALL utilities here
-│   ├── supabase/     # Supabase clients
+│   ├── supabase/     # Supabase clients (supabase variants)
+│   ├── convex/       # Convex client (convex variants)
 │   └── utils.ts      # General utilities
 ├── hooks/            # Custom hooks
 └── types/            # TypeScript definitions

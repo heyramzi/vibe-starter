@@ -1,34 +1,58 @@
-# Vibe Starter - Next.js
+# Vibe Starter - Next.js + Convex
 
-Next.js 16 starter with Supabase, TailwindCSS 4, and TypeScript.
+Next.js 16 starter with Convex, TailwindCSS 4, and TypeScript.
 
 ## Getting Started
 
-1. **Install dependencies**
-   ```bash
-   pnpm install
-   ```
-
-2. **Configure environment**
-   ```bash
-   cp ../.env.example .env.local
-   # Edit .env.local with your Supabase credentials
-   ```
-
-3. **Start development server**
-   ```bash
-   pnpm dev
-   ```
+```bash
+pnpm install
+npx convex dev  # Initialize Convex project
+cp ../../.env.example.convex .env.local
+# Edit .env.local with your Convex credentials
+pnpm dev
+```
 
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript 5.9 (strict mode)
-- **Styling**: TailwindCSS 4.1
-- **Database**: Supabase
-- **UI Components**: shadcn/ui (install via `pnpm dlx shadcn@latest add [component]`)
-- **Testing**: Vitest + React Testing Library
-- **Package Manager**: PNPM 10
+- **Database**: Convex (reactive document DB)
+- **Auth**: Convex Auth OTP (passwordless)
+- **Payments**: @convex-dev/stripe component
+- **Styling**: TailwindCSS 4
+- **UI**: shadcn/ui
+
+## Auth (OTP)
+
+```typescript
+import { useConvexAuth } from "@/lib/convex"
+
+function LoginForm() {
+  const { sendOTP, verifyOTP, signOut } = useConvexAuth()
+
+  // Send OTP
+  await sendOTP("user@example.com")
+
+  // Verify OTP
+  await verifyOTP("user@example.com", "123456")
+
+  // Sign out
+  await signOut()
+}
+```
+
+## Convex Queries
+
+```typescript
+import { useQuery, useMutation } from "convex/react"
+import { api } from "../../convex/_generated/api"
+
+// Reactive query
+const orgs = useQuery(api.organizations.list)
+
+// Mutation
+const createOrg = useMutation(api.organizations.create)
+await createOrg({ name: "My Org" })
+```
 
 ## Project Structure
 
@@ -38,34 +62,25 @@ src/
 ├── components/
 │   └── ui/                 # shadcn/ui components
 ├── lib/
-│   ├── supabase/           # Supabase clients
-│   ├── schemas/            # Zod validation schemas
-│   └── utils.ts            # Utilities (cn helper)
+│   ├── convex/             # Convex client + auth
+│   └── utils.ts            # Utilities
 ├── hooks/                  # Custom React hooks
-├── types/                  # Shared TypeScript types
-├── styles/                 # Global styles
-└── test/                   # Test setup
+└── types/                  # Shared TypeScript types
+convex/
+├── schema.ts               # Database schema
+├── auth.ts                 # Auth configuration
+└── http.ts                 # HTTP routes
 ```
 
 ## Commands
 
 ```bash
 pnpm dev           # Start development server
+npx convex dev     # Start Convex dev server
 pnpm build         # Build for production
-pnpm test          # Run tests in watch mode
-pnpm test:run      # Run tests once
-pnpm lint          # Lint code
-pnpm format        # Format code
-```
-
-## Adding shadcn/ui Components
-
-```bash
-pnpm dlx shadcn@latest add button
-pnpm dlx shadcn@latest add card
-pnpm dlx shadcn@latest add dialog
+pnpm test:run      # Run tests
 ```
 
 ## Documentation
 
-See `../.claude/CLAUDE.md` for development guidelines and patterns.
+See `../../.claude/CLAUDE.md` for development guidelines.
