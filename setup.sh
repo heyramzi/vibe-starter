@@ -1,52 +1,77 @@
 #!/bin/bash
 
 # Vibe Starter Setup Script
-# Usage: ./setup.sh nextjs   or   ./setup.sh sveltekit
+# Usage: ./setup.sh <variant>
 
 set -e
 
-FRAMEWORK="$1"
-
-if [[ "$FRAMEWORK" != "nextjs" && "$FRAMEWORK" != "sveltekit" ]]; then
-  echo "Usage: ./setup.sh <framework>"
+usage() {
+  echo "Usage: ./setup.sh <variant>"
   echo ""
-  echo "Frameworks:"
-  echo "  nextjs     - Next.js 16 + React 19 + shadcn/ui"
-  echo "  sveltekit  - SvelteKit 2 + Svelte 5 + bits-ui"
+  echo "Variants:"
+  echo "  nextjs-supabase     Next.js 16 + Supabase"
+  echo "  nextjs-convex       Next.js 16 + Convex"
+  echo "  sveltekit-supabase  SvelteKit 2 + Supabase"
+  echo "  sveltekit-convex    SvelteKit 2 + Convex"
   echo ""
   echo "Example:"
-  echo "  ./setup.sh nextjs"
+  echo "  ./setup.sh nextjs-convex"
   exit 1
-fi
+}
 
-if [[ "$FRAMEWORK" == "nextjs" ]]; then
-  OTHER="sveltekit"
-  ENV_FILE=".env.local"
-else
-  OTHER="nextjs"
-  ENV_FILE=".env"
-fi
+case "$1" in
+  nextjs-supabase)
+    FRAMEWORK="nextjs"
+    BACKEND="supabase"
+    ENV_FILE=".env.local"
+    ;;
+  nextjs-convex)
+    FRAMEWORK="nextjs"
+    BACKEND="convex"
+    ENV_FILE=".env.local"
+    ;;
+  sveltekit-supabase)
+    FRAMEWORK="sveltekit"
+    BACKEND="supabase"
+    ENV_FILE=".env"
+    ;;
+  sveltekit-convex)
+    FRAMEWORK="sveltekit"
+    BACKEND="convex"
+    ENV_FILE=".env"
+    ;;
+  *)
+    usage
+    ;;
+esac
 
-echo "Setting up $FRAMEWORK..."
+OTHER_FRAMEWORK=$([[ "$FRAMEWORK" == "nextjs" ]] && echo "sveltekit" || echo "nextjs")
 
-# Remove the other framework
-rm -rf "$OTHER"
-echo "Removed $OTHER/"
+echo "Setting up $FRAMEWORK with $BACKEND..."
 
-# Move framework files to root
-mv "$FRAMEWORK"/* .
-mv "$FRAMEWORK"/.[!.]* . 2>/dev/null || true
+# Remove other framework entirely
+rm -rf "$OTHER_FRAMEWORK"
+echo "Removed $OTHER_FRAMEWORK/"
+
+# Move selected variant to framework root, then to project root
+mv "$FRAMEWORK/$BACKEND"/* "$FRAMEWORK/$BACKEND"/.[!.]* . 2>/dev/null || mv "$FRAMEWORK/$BACKEND"/* .
 rm -rf "$FRAMEWORK"
-echo "Moved $FRAMEWORK/ contents to root"
+echo "Moved $FRAMEWORK/$BACKEND/ contents to root"
 
-# Set up environment file
-if [[ -f ".env.example" ]]; then
-  cp .env.example "$ENV_FILE"
+# Set up environment file from backend-specific template
+if [[ -f ".env.example.$BACKEND" ]]; then
+  cp ".env.example.$BACKEND" "$ENV_FILE"
+  echo "Created $ENV_FILE from .env.example.$BACKEND"
+elif [[ -f ".env.example" ]]; then
+  cp ".env.example" "$ENV_FILE"
   echo "Created $ENV_FILE from .env.example"
 fi
 
+# Clean up env templates
+rm -f .env.example.supabase .env.example.convex 2>/dev/null
+
 echo ""
 echo "Done! Next steps:"
-echo "  1. Edit $ENV_FILE with your Supabase credentials"
+echo "  1. Edit $ENV_FILE with your credentials"
 echo "  2. Run: pnpm install"
 echo "  3. Run: pnpm dev"
