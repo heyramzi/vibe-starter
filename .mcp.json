@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "convex": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/convex-mcp-server"],
+      "env": {
+        "CONVEX_DEPLOYMENT": "${CONVEX_DEPLOYMENT}",
+        "CONVEX_ADMIN_KEY": "${CONVEX_ADMIN_KEY}"
+      }
+    }
+  }
+}
