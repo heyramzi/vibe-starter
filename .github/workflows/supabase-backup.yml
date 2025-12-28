@@ -1,0 +1,253 @@
+# Reusable Supabase Backup Workflow
+#
+# This workflow can be used across all Supabase projects in the Studio folder.
+#
+# Usage in your project's .github/workflows/backup.yml:
+#
+# name: Database Backup
+# on:
+#   schedule:
+#     - cron: '0 2 */3 * *'  # Every 3 days at 2 AM UTC
+#   workflow_dispatch:
+#
+# jobs:
+#   backup:
+#     uses: heyramzi/vibe-starter/.github/workflows/supabase-backup.yml@main
+#     with:
+#       backup-retention: 3
+#       backup-dir: 'backups'
+#     secrets:
+#       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+name: Reusable Supabase Backup
+
+on:
+  workflow_call:
+    inputs:
+      backup-retention:
+        description: 'Number of backup sets to retain'
+        required: false
+        type: number
+        default: 3
+      backup-dir:
+        description: 'Directory to store backups'
+        required: false
+        type: string
+        default: 'backups'
+      include-roles:
+        description: 'Include database roles in backup'
+        required: false
+        type: boolean
+        default: true
+      compress:
+        description: 'Compress backup files with gzip'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      SUPABASE_DB_URL:
+        description: 'Supabase database connection URL'
+        required: true
+
+jobs:
+  backup_database:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Create backup directory
+        run: |
+          mkdir -p ${{ inputs.backup-dir }}
+          echo "✓ Backup directory: ${{ inputs.backup-dir }}"
+
+      - name: Generate backup timestamp
+        id: timestamp
+        run: |
+          BACKUP_DATE=$(date +%Y-%m-%d_%H-%M-%S)
+          echo "backup_date=$BACKUP_DATE" >> $GITHUB_OUTPUT
+          echo "✓ Timestamp: $BACKUP_DATE"
+
+      - name: Backup database roles
+        if: ${{ inputs.include-roles }}
+        run: |
+          supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" \
+            -f "${{ inputs.backup-dir }}/roles_${{ steps.timestamp.outputs.backup_date }}.sql" \
+            --role-only
+          echo "✓ Roles backed up"
+
+      - name: Backup database schema
+        run: |
+          supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" \
+            -f "${{ inputs.backup-dir }}/schema_${{ steps.timestamp.outputs.backup_date }}.sql"
+          echo "✓ Schema backed up"
+
+      - name: Backup database data
+        run: |
+          supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" \
+            -f "${{ inputs.backup-dir }}/data_${{ steps.timestamp.outputs.backup_date }}.sql" \
+            --data-only --use-copy
+          echo "✓ Data backed up"
+
+      - name: Compress backups
+        if: ${{ inputs.compress }}
+        run: |
+          cd ${{ inputs.backup-dir }}
+
+          if [ "${{ inputs.include-roles }}" == "true" ]; then
+            gzip "roles_${{ steps.timestamp.outputs.backup_date }}.sql"
+            echo "✓ Roles compressed"
+          fi
+
+          gzip "schema_${{ steps.timestamp.outputs.backup_date }}.sql"
+          gzip "data_${{ steps.timestamp.outputs.backup_date }}.sql"
+          echo "✓ Backups compressed"
+
+      - name: Create backup manifest
+        run: |
+          FILE_EXT="${{ inputs.compress == true && '.sql.gz' || '.sql' }}"
+
+          cat > "${{ inputs.backup-dir }}/manifest_${{ steps.timestamp.outputs.backup_date }}.json" << EOF
+          {
+            "timestamp": "${{ steps.timestamp.outputs.backup_date }}",
+            "date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "compressed": ${{ inputs.compress }},
+            "include_roles": ${{ inputs.include-roles }},
+            "files": {
+              $(if [ "${{ inputs.include-roles }}" == "true" ]; then echo '"roles": "roles_${{ steps.timestamp.outputs.backup_date }}${FILE_EXT}",'; fi)
+              "schema": "schema_${{ steps.timestamp.outputs.backup_date }}${FILE_EXT}",
+              "data": "data_${{ steps.timestamp.outputs.backup_date }}${FILE_EXT}"
+            },
+            "sizes": {
+              $(if [ "${{ inputs.include-roles }}" == "true" ]; then echo '"roles": "$(du -h ${{ inputs.backup-dir }}/roles_${{ steps.timestamp.outputs.backup_date }}${FILE_EXT} | cut -f1)",'; fi)
+              "schema": "$(du -h ${{ inputs.backup-dir }}/schema_${{ steps.timestamp.outputs.backup_date }}${FILE_EXT} | cut -f1)",
+              "data": "$(du -h ${{ inputs.backup-dir }}/data_${{ steps.timestamp.outputs.backup_date }}${FILE_EXT} | cut -f1)"
+            }
+          }
+          EOF
+          echo "✓ Manifest created"
+
+      - name: Cleanup old backups
+        run: |
+          cd ${{ inputs.backup-dir }}
+
+          BACKUP_COUNT=$(ls -1 manifest_*.json 2>/dev/null | wc -l)
+          echo "Current backup count: $BACKUP_COUNT"
+
+          if [ $BACKUP_COUNT -gt ${{ inputs.backup-retention }} ]; then
+            OLD_MANIFESTS=$(ls -1t manifest_*.json | tail -n +$((${{ inputs.backup-retention }} + 1)))
+
+            for manifest in $OLD_MANIFESTS; do
+              TIMESTAMP=$(echo $manifest | sed 's/manifest_\(.*\)\.json/\1/')
+              echo "Deleting old backup set: $TIMESTAMP"
+
+              rm -f "roles_${TIMESTAMP}.sql"* "schema_${TIMESTAMP}.sql"* "data_${TIMESTAMP}.sql"* "manifest_${TIMESTAMP}.json"
+              echo "✓ Deleted: $TIMESTAMP"
+            done
+
+            echo "✓ Cleanup complete. Kept last ${{ inputs.backup-retention }} backups."
+          else
+            echo "✓ No cleanup needed. Backup count: $BACKUP_COUNT"
+          fi
+
+      - name: Create backup summary
+        run: |
+          cat > ${{ inputs.backup-dir }}/README.md << 'EOF'
+          # Supabase Database Backups
+
+          **Automated backups with configurable retention**
+
+          ## Configuration
+          - Retention: Last ${{ inputs.backup-retention }} backup sets
+          - Compression: ${{ inputs.compress }}
+          - Include Roles: ${{ inputs.include-roles }}
+
+          ## Backup Contents
+          Each backup set includes:
+          - Schema: Database structure (tables, indexes, constraints, RLS)
+          - Data: All table data (efficient COPY format)
+          $(if [ "${{ inputs.include-roles }}" == "true" ]; then echo "- Roles: Database roles and permissions"; fi)
+          - Manifest: Backup metadata (timestamp, sizes)
+
+          ## Restore Instructions
+
+          ```bash
+          # Choose backup timestamp
+          BACKUP_DATE="<timestamp>"
+          $(if [ "${{ inputs.compress }}" == "true" ]; then echo "FILE_EXT='.sql.gz'"; else echo "FILE_EXT='.sql'"; fi)
+
+          # Set database URL
+          SUPABASE_DB_URL="postgresql://postgres:...@db.xxx.supabase.co:5432/postgres"
+
+          $(if [ "${{ inputs.compress }}" == "true" ]; then cat << 'COMPRESS_EOF'
+          # Decompress first
+          cd ${{ inputs.backup-dir }}
+          gunzip -k schema_${BACKUP_DATE}.sql.gz
+          gunzip -k data_${BACKUP_DATE}.sql.gz
+          COMPRESS_EOF
+          fi)
+
+          # Restore schema
+          psql "$SUPABASE_DB_URL" < ${{ inputs.backup-dir }}/schema_${BACKUP_DATE}${FILE_EXT}
+
+          # Restore data
+          psql "$SUPABASE_DB_URL" < ${{ inputs.backup-dir }}/data_${BACKUP_DATE}${FILE_EXT}
+          ```
+
+          ## Security
+          ⚠️ Store backups in PRIVATE repositories only!
+
+          ## Backup History
+          EOF
+
+          echo "" >> ${{ inputs.backup-dir }}/README.md
+          echo "### Current Backups" >> ${{ inputs.backup-dir }}/README.md
+          echo "" >> ${{ inputs.backup-dir }}/README.md
+
+          for manifest in $(ls -1t ${{ inputs.backup-dir }}/manifest_*.json 2>/dev/null); do
+            TIMESTAMP=$(basename "$manifest" .json | sed 's/manifest_//')
+            DATE=$(jq -r '.date' "$manifest")
+
+            echo "- **$TIMESTAMP** ($DATE)" >> ${{ inputs.backup-dir }}/README.md
+
+            if jq -e '.files.roles' "$manifest" > /dev/null 2>&1; then
+              echo "  - Roles: $(jq -r '.sizes.roles' "$manifest")" >> ${{ inputs.backup-dir }}/README.md
+            fi
+
+            echo "  - Schema: $(jq -r '.sizes.schema' "$manifest")" >> ${{ inputs.backup-dir }}/README.md
+            echo "  - Data: $(jq -r '.sizes.data' "$manifest")" >> ${{ inputs.backup-dir }}/README.md
+            echo "" >> ${{ inputs.backup-dir }}/README.md
+          done
+
+      - name: Commit and push backups
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore(backup): automated database backup ${{ steps.timestamp.outputs.backup_date }}'
+          file_pattern: '${{ inputs.backup-dir }}/*'
+          commit_user_name: 'Supabase Backup Bot'
+          commit_user_email: 'backup-bot@supabase.local'
+
+      - name: Backup summary
+        run: |
+          echo "================================================"
+          echo "✓ Database backup completed successfully!"
+          echo "================================================"
+          echo "Timestamp: ${{ steps.timestamp.outputs.backup_date }}"
+          echo "Retention: ${{ inputs.backup-retention }} backups"
+          echo "Compressed: ${{ inputs.compress }}"
+          echo ""
+          echo "Backup directory contents:"
+          ls -lh ${{ inputs.backup-dir }}/*_${{ steps.timestamp.outputs.backup_date }}*
+          echo ""
+          echo "Total size: $(du -sh ${{ inputs.backup-dir }} | cut -f1)"
+          echo "================================================"

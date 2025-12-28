@@ -23,7 +23,7 @@ on:
 
 jobs:
   backup:
-    uses: heyramzi/studio-utils/.github/workflows/supabase-backup.yml@main
+    uses: heyramzi/vibe-starter/.github/workflows/supabase-backup.yml@main
     with:
       backup-retention: 5      # Keep last 5 backups (15 days of history)
       backup-dir: 'backups'    # Store in ./backups/
