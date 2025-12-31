@@ -19,5 +19,5 @@
  */
 
 // Placeholder types until Convex generates them
-export type Doc<T extends string> = { _id: string; _creationTime: number } & Record<string, unknown>
-export type Id<T extends string> = string
+export type Doc<_T extends string> = { _id: string; _creationTime: number } & Record<string, unknown>
+export type Id<_T extends string> = string

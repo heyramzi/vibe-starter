@@ -49,8 +49,6 @@ async function syncSubscription(subscription: Stripe.Subscription) {
   const organizationId = subscription.metadata.organization_id
   if (!organizationId) return
 
-  const _item = subscription.items.data[0]
-
   // TODO: Create a Convex mutation for updating organization subscription
   // Use ConvexHttpClient to call the mutation
   console.log('Sync subscription:', organizationId, mapStatus(subscription.status))
