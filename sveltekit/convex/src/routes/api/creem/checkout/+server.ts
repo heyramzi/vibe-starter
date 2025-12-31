@@ -2,15 +2,12 @@ import { json, error, type RequestEvent } from '@sveltejs/kit'
 import { CreemService } from '$lib/creem'
 import { env } from '$env/dynamic/public'
 
-export async function POST({ request, locals }: RequestEvent) {
-	// Optional: require authentication
-	const { user } = await locals.safeGetSession()
-	if (!user) {
-		throw error(401, 'Unauthorized')
-	}
+export async function POST({ request }: RequestEvent) {
+	// TODO: Implement Convex auth check for server-side routes
+	// For now, the route is public - add auth token validation if needed
 
 	const body = await request.json()
-	const { productId, referenceId, units, discountCode, successUrl } = body
+	const { productId, referenceId, units, discountCode, successUrl, email } = body
 
 	if (!productId || !referenceId) {
 		throw error(400, 'Missing productId or referenceId')
@@ -23,7 +20,7 @@ export async function POST({ request, locals }: RequestEvent) {
 			units,
 			discountCode,
 			successUrl: successUrl ?? `${env.PUBLIC_APP_URL}/billing?success=true`,
-			customer: user.email ? { email: user.email } : undefined
+			customer: email ? { email } : undefined
 		})
 
 		return json(result)

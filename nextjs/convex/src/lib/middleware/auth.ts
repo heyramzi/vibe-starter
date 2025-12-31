@@ -1,20 +1,15 @@
-import { createServerClient } from '@/lib/supabase'
-import type { User } from '@supabase/supabase-js'
+// Auth middleware for Convex
+// Note: Convex uses client-side auth via useConvexAuth hook
+// Server-side auth is handled in Convex functions via ctx.auth
 
 export interface AuthContext {
-  user: User
+  userId: string
 }
 
-// Get authenticated user or throw
+// Placeholder for server-side auth patterns
+// In Convex, auth is typically checked in Convex functions using ctx.auth.getUserIdentity()
 export async function requireAuth(): Promise<AuthContext> {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error('Unauthorized')
-  }
-
-  return { user }
+  // This pattern doesn't apply to Convex in the same way as Supabase
+  // For protected routes, use Next.js middleware or check auth in components
+  throw new Error('Use Convex auth hooks instead: useConvexAuth()')
 }

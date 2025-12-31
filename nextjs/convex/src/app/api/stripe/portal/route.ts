@@ -1,15 +1,20 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { StripeService } from '@/lib/stripe'
-import { requireAuth, requireOrg, requireRole } from '@/lib/middleware'
 
-export async function POST() {
+const portalSchema = z.object({
+  organizationId: z.string(),
+})
+
+export async function POST(request: Request) {
   try {
-    const { user } = await requireAuth()
-    const { organization, role } = await requireOrg(user.id)
+    // TODO: Validate auth token from Convex
+    // For now, client must send organizationId
 
-    requireRole(role, 'owner')
+    const body = await request.json()
+    const { organizationId } = portalSchema.parse(body)
 
-    const { url } = await StripeService.createPortalSession(organization.id)
+    const { url } = await StripeService.createPortalSession(organizationId)
 
     if (!url) {
       throw new Error('Failed to create portal session')

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { useConvexAuth } from "@/lib/convex/auth"
 import { Button } from "@/components/ui/button"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 
@@ -13,6 +13,7 @@ interface OTPVerifyProps {
 
 export function OTPVerify({ email, redirectTo = "/dashboard" }: OTPVerifyProps) {
   const router = useRouter()
+  const { verifyOTP, sendOTP } = useConvexAuth()
   const [code, setCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isResending, setIsResending] = useState(false)
@@ -24,38 +25,23 @@ export function OTPVerify({ email, redirectTo = "/dashboard" }: OTPVerifyProps) 
     setIsLoading(true)
     setError(null)
 
-    const supabase = createClient()
-
-    const { error: verifyError } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: "email",
-    })
-
-    if (verifyError) {
-      setError(verifyError.message)
+    try {
+      await verifyOTP(email, token)
+      router.push(redirectTo)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid code")
       setIsLoading(false)
-      return
     }
-
-    router.push(redirectTo)
   }
 
   async function handleResend() {
     setIsResending(true)
     setError(null)
 
-    const supabase = createClient()
-
-    const { error: resendError } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${redirectTo}`,
-      },
-    })
-
-    if (resendError) {
-      setError(resendError.message)
+    try {
+      await sendOTP(email)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to resend code")
     }
 
     setIsResending(false)
