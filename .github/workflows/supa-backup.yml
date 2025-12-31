@@ -27,7 +27,7 @@ jobs:
     with:
       backup-retention: 5      # Keep last 5 backups (15 days of history)
       backup-dir: 'backups'    # Store in ./backups/
-      include-roles: true      # Include database roles
+      include-roles: false     # Disabled - Supabase CLI bug with remote --db-url
       compress: false          # No compression (faster restore)
     secrets:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
