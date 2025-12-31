@@ -48,7 +48,7 @@ export const StripeService = {
   },
 
   // Create customer portal session
-  async createPortalSession(organizationId: string) {
+  async createPortalSession(_organizationId: string) {
     // TODO: Fetch organization from Convex to get stripeCustomerId
     const stripeCustomerId = '' // Get from org
 
