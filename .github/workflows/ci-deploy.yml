@@ -25,24 +25,25 @@ env:
 
 jobs:
   ci:
-    name: CI (${{ matrix.project }})
+    name: CI (${{ matrix.framework }}/${{ matrix.backend }})
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.skip_ci != 'true' }}
     strategy:
       fail-fast: false
       matrix:
-        project: [nextjs, sveltekit]
+        framework: [nextjs, sveltekit]
+        backend: [supabase, convex]
         include:
-          - project: nextjs
+          - framework: nextjs
             type-check: pnpm exec tsc --noEmit
             port: 3000
-          - project: sveltekit
+          - framework: sveltekit
             type-check: pnpm check
             port: 5173
 
     defaults:
       run:
-        working-directory: ${{ matrix.project }}
+        working-directory: ${{ matrix.framework }}/${{ matrix.backend }}
 
     steps:
       - name: Checkout
@@ -58,7 +59,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: ${{ matrix.project }}/pnpm-lock.yaml
+          cache-dependency-path: ${{ matrix.framework }}/${{ matrix.backend }}/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -66,9 +67,12 @@ jobs:
       - name: Type check
         run: ${{ matrix.type-check }}
         env:
-          # SvelteKit needs these for $env/static/public type generation
+          # Supabase env vars (for supabase variants)
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'placeholder-key' }}
+          # Convex env vars (for convex variants)
+          PUBLIC_CONVEX_URL: ${{ secrets.PUBLIC_CONVEX_URL || 'https://placeholder.convex.cloud' }}
+          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL || 'https://placeholder.convex.cloud' }}
 
       - name: Lint
         run: pnpm lint
@@ -83,10 +87,14 @@ jobs:
         run: pnpm build
         env:
           SKIP_ENV_VALIDATION: true
+          # Supabase env vars
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'placeholder-key' }}
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'placeholder-key' }}
+          # Convex env vars
+          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL || 'https://placeholder.convex.cloud' }}
+          PUBLIC_CONVEX_URL: ${{ secrets.PUBLIC_CONVEX_URL || 'https://placeholder.convex.cloud' }}
 
       - name: E2E tests
         run: pnpm test:e2e --project=chromium
@@ -97,8 +105,8 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-${{ matrix.project }}
-          path: ${{ matrix.project }}/playwright-report/
+          name: playwright-report-${{ matrix.framework }}-${{ matrix.backend }}
+          path: ${{ matrix.framework }}/${{ matrix.backend }}/playwright-report/
           retention-days: 7
 
   deploy-nextjs:
