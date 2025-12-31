@@ -1,6 +1,5 @@
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe/client'
-import { createServerClient } from '@/lib/supabase'
 import type { SubscriptionStatus } from '@/lib/stripe/types'
 import { pricingPlans } from '@/lib/stripe/plans'
 import { EmailService } from '@/lib/email'
@@ -45,22 +44,16 @@ function sendEmailAsync(fn: () => Promise<unknown>) {
   fn().catch((err) => console.error('Email send failed:', err))
 }
 
-// Sync subscription data to database
+// Sync subscription data to Convex database
 async function syncSubscription(subscription: Stripe.Subscription) {
   const organizationId = subscription.metadata.organization_id
   if (!organizationId) return
 
-  const supabase = await createServerClient()
-  const item = subscription.items.data[0]
+  const _item = subscription.items.data[0]
 
-  await supabase
-    .from('organizations')
-    .update({
-      stripe_subscription_id: subscription.id,
-      subscription_status: mapStatus(subscription.status),
-      seats: item?.quantity || 1,
-    })
-    .eq('id', organizationId)
+  // TODO: Create a Convex mutation for updating organization subscription
+  // Use ConvexHttpClient to call the mutation
+  console.log('Sync subscription:', organizationId, mapStatus(subscription.status))
 }
 
 export const WebhookHandler = {
@@ -113,14 +106,8 @@ export const WebhookHandler = {
         const subscription = event.data.object as Stripe.Subscription
         const organizationId = subscription.metadata.organization_id
         if (organizationId) {
-          const supabase = await createServerClient()
-          await supabase
-            .from('organizations')
-            .update({
-              subscription_status: 'canceled',
-              stripe_subscription_id: null,
-            })
-            .eq('id', organizationId)
+          // TODO: Create a Convex mutation for canceling subscription
+          console.log('Cancel subscription:', organizationId)
 
           // Send subscription cancelled email
           const email = await getCustomerEmail(subscription.customer)
@@ -142,11 +129,8 @@ export const WebhookHandler = {
           const subscription = await stripe.subscriptions.retrieve(subscriptionId)
           const organizationId = subscription.metadata.organization_id
           if (organizationId) {
-            const supabase = await createServerClient()
-            await supabase
-              .from('organizations')
-              .update({ subscription_status: 'past_due' })
-              .eq('id', organizationId)
+            // TODO: Create a Convex mutation for marking subscription past due
+            console.log('Payment failed:', organizationId)
 
             // Send payment failed email
             const email = await getCustomerEmail(subscription.customer)

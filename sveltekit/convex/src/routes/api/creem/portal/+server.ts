@@ -1,11 +1,9 @@
 import { json, error, type RequestEvent } from '@sveltejs/kit'
 import { CreemService } from '$lib/creem'
 
-export async function POST({ request, locals }: RequestEvent) {
-	const { user } = await locals.safeGetSession()
-	if (!user) {
-		throw error(401, 'Unauthorized')
-	}
+export async function POST({ request }: RequestEvent) {
+	// TODO: Implement Convex auth check for server-side routes
+	// For now, the route is public - add auth token validation if needed
 
 	const body = await request.json()
 	const { customerId } = body

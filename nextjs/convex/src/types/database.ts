@@ -1,42 +1,23 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
-
 /**
- * Supabase Database Type Helpers
+ * Convex Database Type Helpers
  *
- * After generating types with `supabase gen types typescript`:
- * 1. Import your Database type
- * 2. Uncomment and use these helpers
+ * Convex generates types automatically from your schema.
+ * Import from convex/_generated/dataModel for type-safe queries.
  *
  * @example
  * ```ts
- * // Get a table row type
- * type User = Tables<'users'>
+ * import { Doc, Id } from "convex/_generated/dataModel"
  *
- * // Get insert type (for creating records)
- * type NewUser = TablesInsert<'users'>
+ * // Get a document type
+ * type User = Doc<"users">
  *
- * // Get update type (for partial updates)
- * type UserUpdate = TablesUpdate<'users'>
+ * // Get an ID type
+ * type UserId = Id<"users">
  * ```
+ *
+ * Note: Types are generated when you run `npx convex dev`
  */
 
-// TODO: Generate types with: pnpm supabase gen types typescript --project-id <id> > src/types/supabase.ts
-// Then uncomment below and import { Database } from './supabase'
-
-// export type Tables<T extends keyof Database['public']['Tables']> =
-//   Database['public']['Tables'][T]['Row']
-
-// export type TablesInsert<T extends keyof Database['public']['Tables']> =
-//   Database['public']['Tables'][T]['Insert']
-
-// export type TablesUpdate<T extends keyof Database['public']['Tables']> =
-//   Database['public']['Tables'][T]['Update']
-
-// export type Enums<T extends keyof Database['public']['Enums']> =
-//   Database['public']['Enums'][T]
-
-// Typed Supabase client (use after generating Database type)
-// export type TypedSupabaseClient = SupabaseClient<Database>
-
-// Placeholder until database types are generated
-export type TypedSupabaseClient = SupabaseClient
+// Placeholder types until Convex generates them
+export type Doc<T extends string> = { _id: string; _creationTime: number } & Record<string, unknown>
+export type Id<T extends string> = string

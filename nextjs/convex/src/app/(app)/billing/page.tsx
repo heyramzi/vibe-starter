@@ -4,9 +4,6 @@ import { CheckCircle, XCircle, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { requireAuth, requireOrg } from '@/lib/middleware'
-import type { Organization } from '@/lib/stripe'
-import { BillingActions } from './BillingActions'
 
 export const metadata: Metadata = {
   title: 'Billing | Vibe Starter',
@@ -20,20 +17,8 @@ interface BillingPageProps {
 export default async function BillingPage({ searchParams }: BillingPageProps) {
   const params = await searchParams
 
-  let user, organization: Organization, role
-
-  try {
-    const auth = await requireAuth()
-    user = auth.user
-    const orgContext = await requireOrg(user.id)
-    organization = orgContext.organization
-    role = orgContext.role
-  } catch {
-    redirect('/login?redirect=/billing')
-  }
-
-  const isOwner = role === 'owner'
-  const hasSubscription = organization.subscription_status === 'active' || organization.subscription_status === 'trialing'
+  // For Convex, auth and org data is fetched client-side
+  // This page shows a placeholder - implement with useQuery hooks in a client component
 
   return (
     <main className="min-h-screen py-12">
@@ -73,7 +58,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
           </Card>
         )}
 
-        {/* Current Plan */}
+        {/* Placeholder - implement with Convex queries */}
         <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -81,70 +66,24 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                 <CreditCard className="size-5" />
                 Current Plan
               </CardTitle>
-              <StatusBadge status={organization.subscription_status} />
+              <Badge variant="outline">Loading...</Badge>
             </div>
             <CardDescription>
-              {organization.name}
+              TODO: Fetch organization data from Convex
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between border-b pb-4">
-              <span className="text-muted-foreground">Seats</span>
-              <span className="font-medium">{organization.seats}</span>
+            <div className="rounded-lg border border-dashed p-4 text-center">
+              <p className="mb-3 text-sm text-muted-foreground">
+                Implement billing with Convex queries
+              </p>
+              <Button asChild>
+                <a href="/pricing">View Plans</a>
+              </Button>
             </div>
-
-            {!hasSubscription && (
-              <div className="rounded-lg border border-dashed p-4 text-center">
-                <p className="mb-3 text-sm text-muted-foreground">
-                  No active subscription
-                </p>
-                <Button asChild>
-                  <a href="/pricing">View Plans</a>
-                </Button>
-              </div>
-            )}
           </CardContent>
         </Card>
-
-        {/* Billing Actions */}
-        {isOwner && hasSubscription && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Manage Subscription</CardTitle>
-              <CardDescription>
-                Update payment method, change plan, or cancel subscription.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <BillingActions />
-            </CardContent>
-          </Card>
-        )}
-
-        {!isOwner && hasSubscription && (
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">
-                Only the organization owner can manage billing settings.
-              </p>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </main>
   )
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
-    active: { variant: 'default', label: 'Active' },
-    trialing: { variant: 'secondary', label: 'Trial' },
-    past_due: { variant: 'destructive', label: 'Past Due' },
-    canceled: { variant: 'outline', label: 'Canceled' },
-    inactive: { variant: 'outline', label: 'Inactive' },
-  }
-
-  const { variant, label } = variants[status] || variants.inactive
-
-  return <Badge variant={variant}>{label}</Badge>
 }

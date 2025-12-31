@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { useConvexAuth } from "@/lib/convex/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,6 +14,7 @@ interface OTPFormProps {
 
 export function OTPForm({ mode, redirectTo = "/dashboard" }: OTPFormProps) {
   const router = useRouter()
+  const { sendOTP } = useConvexAuth()
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -23,23 +24,13 @@ export function OTPForm({ mode, redirectTo = "/dashboard" }: OTPFormProps) {
     setIsLoading(true)
     setError(null)
 
-    const supabase = createClient()
-
-    const { error: otpError } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${redirectTo}`,
-      },
-    })
-
-    if (otpError) {
-      setError(otpError.message)
+    try {
+      await sendOTP(email)
+      router.push(`/verify?email=${encodeURIComponent(email)}&next=${redirectTo}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send OTP")
       setIsLoading(false)
-      return
     }
-
-    // Redirect to verify page with email
-    router.push(`/verify?email=${encodeURIComponent(email)}&next=${redirectTo}`)
   }
 
   return (

@@ -1,40 +1,14 @@
 import { Metadata } from 'next'
 import { PricingTable } from '@/components/pricing'
-import { createServerClient } from '@/lib/supabase'
-import type { Organization } from '@/lib/stripe'
 
 export const metadata: Metadata = {
   title: 'Pricing | Vibe Starter',
   description: 'Simple, transparent pricing for teams of all sizes.',
 }
 
-async function getOrgContext() {
-  try {
-    const supabase = await createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) return null
-
-    const { data: membership } = await supabase
-      .from('organization_members')
-      .select('organizations(*)')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership?.organizations) return null
-
-    const org = membership.organizations as unknown as Organization
-    return {
-      organizationId: org.id,
-      currentPlanId: org.subscription_status === 'active' ? 'current' : undefined,
-    }
-  } catch {
-    return null
-  }
-}
-
-export default async function PricingPage() {
-  const context = await getOrgContext()
+export default function PricingPage() {
+  // For Convex, organization context is fetched client-side using useQuery
+  // The PricingTable component handles this internally
 
   return (
     <main className="min-h-screen py-20">
@@ -50,10 +24,7 @@ export default async function PricingPage() {
         </div>
 
         {/* Pricing Table */}
-        <PricingTable
-          organizationId={context?.organizationId}
-          currentPlanId={context?.currentPlanId}
-        />
+        <PricingTable />
 
         {/* FAQ or additional info */}
         <div className="mx-auto mt-20 max-w-2xl text-center">

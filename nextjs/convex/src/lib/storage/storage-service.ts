@@ -1,4 +1,20 @@
-import { createClient as createServerClient } from '@/lib/supabase/server'
+/**
+ * Convex Storage Service
+ *
+ * Convex has built-in file storage. Use it like this:
+ *
+ * Client-side upload:
+ * const generateUploadUrl = useMutation(api.files.generateUploadUrl)
+ * const url = await generateUploadUrl()
+ * await fetch(url, { method: "POST", body: file })
+ *
+ * Server-side in Convex functions:
+ * const storageId = await ctx.storage.store(blob)
+ * const url = await ctx.storage.getUrl(storageId)
+ *
+ * See: https://docs.convex.dev/file-storage
+ */
+
 import type {
   StorageBucket,
   UploadOptions,
@@ -8,177 +24,75 @@ import type {
   FileObject,
 } from './types'
 
-const DEFAULT_BUCKET: StorageBucket = 'documents'
-
+// Placeholder - implement using Convex file storage
 export const StorageService = {
-  // Upload a file to storage
   async upload(
-    file: File | Blob,
-    fileName: string,
-    options: UploadOptions = {}
+    _file: File | Blob,
+    _fileName: string,
+    _options: UploadOptions = {}
   ): Promise<UploadResult> {
-    const supabase = await createServerClient()
-    const bucket = options.bucket ?? DEFAULT_BUCKET
-    const filePath = options.path ? `${options.path}/${fileName}` : fileName
-
-    const { data, error } = await supabase.storage.from(bucket).upload(filePath, file, {
-      upsert: options.upsert ?? false,
-      contentType: options.contentType,
-    })
-
-    if (error) {
-      throw new Error(`Upload failed: ${error.message}`)
-    }
-
-    // Get public URL if bucket is public
-    const publicUrl =
-      bucket === 'public'
-        ? supabase.storage.from(bucket).getPublicUrl(data.path).data.publicUrl
-        : null
-
-    return {
-      path: data.path,
-      fullPath: data.fullPath,
-      publicUrl,
-    }
+    throw new Error('Use Convex file storage: useMutation(api.files.generateUploadUrl)')
   },
 
-  // Upload with user-scoped path (user-{id}/filename)
   async uploadForUser(
-    userId: string,
-    file: File | Blob,
-    fileName: string,
-    options: Omit<UploadOptions, 'path'> = {}
+    _userId: string,
+    _file: File | Blob,
+    _fileName: string,
+    _options: Omit<UploadOptions, 'path'> = {}
   ): Promise<UploadResult> {
-    return this.upload(file, fileName, {
-      ...options,
-      path: `user-${userId}`,
-    })
+    throw new Error('Use Convex file storage with user context')
   },
 
-  // Upload with org-scoped path (org-{id}/filename)
   async uploadForOrg(
-    orgId: string,
-    file: File | Blob,
-    fileName: string,
-    options: Omit<UploadOptions, 'path'> = {}
+    _orgId: string,
+    _file: File | Blob,
+    _fileName: string,
+    _options: Omit<UploadOptions, 'path'> = {}
   ): Promise<UploadResult> {
-    return this.upload(file, fileName, {
-      ...options,
-      path: `org-${orgId}`,
-    })
+    throw new Error('Use Convex file storage with org context')
   },
 
-  // Download file data
-  async download(path: string, bucket: StorageBucket = DEFAULT_BUCKET): Promise<Blob> {
-    const supabase = await createServerClient()
-
-    const { data, error } = await supabase.storage.from(bucket).download(path)
-
-    if (error) {
-      throw new Error(`Download failed: ${error.message}`)
-    }
-
-    return data
+  async download(_path: string, _bucket: StorageBucket = 'documents'): Promise<Blob> {
+    throw new Error('Use Convex ctx.storage.get(storageId)')
   },
 
-  // Get public URL (only works for public bucket)
-  getPublicUrl(path: string, bucket: StorageBucket = 'public'): string {
-    // This is sync - doesn't need auth, just constructs URL
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    return `${supabaseUrl}/storage/v1/object/public/${bucket}/${path}`
+  getPublicUrl(_path: string, _bucket: StorageBucket = 'public'): string {
+    throw new Error('Use Convex ctx.storage.getUrl(storageId)')
   },
 
-  // Get signed URL for private files
-  async getSignedUrl(path: string, options: SignedUrlOptions = {}): Promise<string> {
-    const supabase = await createServerClient()
-    const bucket = options.bucket ?? DEFAULT_BUCKET
-    const expiresIn = options.expiresIn ?? 3600
-
-    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn, {
-      download: options.download,
-    })
-
-    if (error) {
-      throw new Error(`Failed to create signed URL: ${error.message}`)
-    }
-
-    return data.signedUrl
+  async getSignedUrl(_path: string, _options: SignedUrlOptions = {}): Promise<string> {
+    throw new Error('Convex storage URLs are already time-limited')
   },
 
-  // List files in a path
-  async list(options: ListOptions = {}): Promise<FileObject[]> {
-    const supabase = await createServerClient()
-    const bucket = options.bucket ?? DEFAULT_BUCKET
-
-    const { data, error } = await supabase.storage.from(bucket).list(options.path, {
-      limit: options.limit ?? 100,
-      offset: options.offset ?? 0,
-      sortBy: options.sortBy ?? { column: 'created_at', order: 'desc' },
-    })
-
-    if (error) {
-      throw new Error(`List failed: ${error.message}`)
-    }
-
-    return data as FileObject[]
+  async list(_options: ListOptions = {}): Promise<FileObject[]> {
+    throw new Error('Query your Convex files table instead')
   },
 
-  // List files for a user
-  async listForUser(userId: string, options: Omit<ListOptions, 'path'> = {}): Promise<FileObject[]> {
-    return this.list({
-      ...options,
-      path: `user-${userId}`,
-    })
+  async listForUser(_userId: string, _options: Omit<ListOptions, 'path'> = {}): Promise<FileObject[]> {
+    throw new Error('Query your Convex files table with user filter')
   },
 
-  // List files for an org
-  async listForOrg(orgId: string, options: Omit<ListOptions, 'path'> = {}): Promise<FileObject[]> {
-    return this.list({
-      ...options,
-      path: `org-${orgId}`,
-    })
+  async listForOrg(_orgId: string, _options: Omit<ListOptions, 'path'> = {}): Promise<FileObject[]> {
+    throw new Error('Query your Convex files table with org filter')
   },
 
-  // Delete a file
-  async delete(paths: string | string[], bucket: StorageBucket = DEFAULT_BUCKET): Promise<void> {
-    const supabase = await createServerClient()
-    const pathArray = Array.isArray(paths) ? paths : [paths]
-
-    const { error } = await supabase.storage.from(bucket).remove(pathArray)
-
-    if (error) {
-      throw new Error(`Delete failed: ${error.message}`)
-    }
+  async delete(_paths: string | string[], _bucket: StorageBucket = 'documents'): Promise<void> {
+    throw new Error('Use Convex ctx.storage.delete(storageId)')
   },
 
-  // Move/rename a file
   async move(
-    fromPath: string,
-    toPath: string,
-    bucket: StorageBucket = DEFAULT_BUCKET
+    _fromPath: string,
+    _toPath: string,
+    _bucket: StorageBucket = 'documents'
   ): Promise<void> {
-    const supabase = await createServerClient()
-
-    const { error } = await supabase.storage.from(bucket).move(fromPath, toPath)
-
-    if (error) {
-      throw new Error(`Move failed: ${error.message}`)
-    }
+    throw new Error('Convex storage does not support move - copy and delete instead')
   },
 
-  // Copy a file
   async copy(
-    fromPath: string,
-    toPath: string,
-    bucket: StorageBucket = DEFAULT_BUCKET
+    _fromPath: string,
+    _toPath: string,
+    _bucket: StorageBucket = 'documents'
   ): Promise<void> {
-    const supabase = await createServerClient()
-
-    const { error } = await supabase.storage.from(bucket).copy(fromPath, toPath)
-
-    if (error) {
-      throw new Error(`Copy failed: ${error.message}`)
-    }
+    throw new Error('Convex storage does not support copy directly')
   },
 }
