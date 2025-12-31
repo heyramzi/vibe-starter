@@ -77,5 +77,10 @@
   "packageManager": "pnpm@10.15.1",
   "engines": {
     "node": ">=22.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "cookie": ">=0.7.0"
+    }
   }
 }

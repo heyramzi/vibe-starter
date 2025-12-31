@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  cookie: '>=0.7.0'
+
 importers:
 
   .:
@@ -1646,10 +1649,6 @@ packages:
         optional: true
       react:
         optional: true
-
-  cookie@0.6.0:
-    resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
-    engines: {node: '>= 0.6'}
 
   cookie@1.1.1:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
@@ -3795,7 +3794,7 @@ snapshots:
       '@sveltejs/vite-plugin-svelte': 6.2.1(svelte@5.46.1)(vite@7.3.0(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2))
       '@types/cookie': 0.6.0
       acorn: 8.15.0
-      cookie: 0.6.0
+      cookie: 1.1.1
       devalue: 5.6.1
       esm-env: 1.2.2
       kleur: 4.1.5
@@ -4287,8 +4286,6 @@ snapshots:
     dependencies:
       esbuild: 0.25.4
       prettier: 3.7.4
-
-  cookie@0.6.0: {}
 
   cookie@1.1.1: {}
 
