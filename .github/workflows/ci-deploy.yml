@@ -33,6 +33,11 @@ jobs:
       matrix:
         framework: [nextjs, sveltekit]
         backend: [supabase, convex]
+        exclude:
+          # Skip nextjs/convex - Convex Auth has SSR compatibility issues with Next.js 16
+          # See: https://github.com/get-convex/convex-auth/issues/87
+          - framework: nextjs
+            backend: convex
         include:
           - framework: nextjs
             type-check: pnpm exec tsc --noEmit
