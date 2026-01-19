@@ -1,0 +1,32 @@
+{
+  "branchName": "ralph/feature-name",
+  "variant": "nextjs/supabase",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Example: Add user profile page",
+      "acceptanceCriteria": [
+        "Create /profile route",
+        "Display user email from auth",
+        "Add sign out button",
+        "pnpm exec tsc --noEmit passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Use existing auth from src/lib/supabase/"
+    },
+    {
+      "id": "US-002",
+      "title": "Example: Add profile edit form",
+      "acceptanceCriteria": [
+        "Add name field to profile",
+        "Save to database on submit",
+        "Show success toast",
+        "pnpm exec tsc --noEmit passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Depends on US-001"
+    }
+  ]
+}
