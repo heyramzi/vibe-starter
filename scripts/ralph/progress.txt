@@ -1,0 +1,18 @@
+# Ralph Progress Log
+
+Started: [DATE]
+Variant: [nextjs/supabase | nextjs/convex | sveltekit/supabase | sveltekit/convex]
+
+## Codebase Patterns
+- All utilities in src/lib/ (never src/utils/)
+- Use const service pattern for services
+- Supabase: server client in server actions, browser client in components
+- Convex: use useQuery/useMutation hooks in components
+- Delete unused code immediately
+
+## Key Files
+- .claude/common-mistakes.md - read before coding
+- .claude/docs/patterns.md - const service pattern
+- src/lib/ - all utilities here
+
+---
