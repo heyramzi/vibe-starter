@@ -19,7 +19,9 @@
     "format": "biome format --write .",
     "format:check": "biome check .",
     "cf:preview": "vite build && wrangler dev",
-    "cf:deploy": "vite build && wrangler deploy"
+    "cf:deploy": "vite build && wrangler deploy",
+    "check:sections": "bash scripts/check-svelte-sections.sh",
+    "prepare": "cp scripts/pre-commit .git/hooks/pre-commit 2>/dev/null || true"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
