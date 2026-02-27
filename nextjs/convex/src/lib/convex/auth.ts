@@ -1,21 +1,25 @@
 "use client"
 
-import { useAuthActions } from "@convex-dev/auth/react"
+import { authClient } from "@/lib/auth-client"
 
 export function useConvexAuth() {
-  const { signIn, signOut } = useAuthActions()
+	return {
+		async sendOTP(email: string) {
+			return authClient.emailOtp.sendVerificationOtp({
+				email,
+				type: "sign-in",
+			})
+		},
 
-  return {
-    async sendOTP(email: string) {
-      return signIn("resend-otp", { email })
-    },
+		async verifyOTP(email: string, code: string) {
+			return authClient.signIn.emailOtp({
+				email,
+				otp: code,
+			})
+		},
 
-    async verifyOTP(email: string, code: string) {
-      return signIn("resend-otp", { email, code })
-    },
-
-    async signOut() {
-      return signOut()
-    },
-  }
+		async signOut() {
+			return authClient.signOut()
+		},
+	}
 }

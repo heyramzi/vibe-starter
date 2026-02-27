@@ -1,7 +1,8 @@
-import type { LayoutServerLoad } from './$types'
+import type { LayoutServerLoad } from "./$types"
+import { createAuth } from "../../convex/auth"
+import { getAuthState } from "@mmailaender/convex-better-auth-svelte/sveltekit"
 
-export const load: LayoutServerLoad = async () => {
-  // For Convex, auth is handled client-side via ConvexAuthProvider
-  // Server-side auth can be checked via Convex HTTP client if needed
-  return { user: null }
+export const load: LayoutServerLoad = async ({ cookies }) => {
+	const authState = await getAuthState(createAuth, cookies)
+	return { authState }
 }

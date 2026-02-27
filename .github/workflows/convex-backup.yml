@@ -1,0 +1,83 @@
+# Reusable Convex Backup Workflow
+#
+# Usage in your project's .github/workflows/backup.yml:
+#
+# name: Database Backup
+# on:
+#   schedule:
+#     - cron: '0 2 */3 * *'
+#   workflow_dispatch:
+#
+# jobs:
+#   backup:
+#     uses: heyramzi/vibe-starter/.github/workflows/convex-backup.yml@main
+#     with:
+#       backup-retention: 5
+#     secrets:
+#       CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
+name: Reusable Convex Backup
+
+on:
+  workflow_call:
+    inputs:
+      backup-retention:
+        description: 'Number of backups to retain'
+        required: false
+        type: number
+        default: 5
+      backup-dir:
+        description: 'Directory to store backups'
+        required: false
+        type: string
+        default: 'backups'
+    secrets:
+      CONVEX_DEPLOY_KEY:
+        description: 'Convex deploy key for the target deployment'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Generate timestamp
+        id: ts
+        run: echo "date=$(date +%Y-%m-%d_%H-%M-%S)" >> $GITHUB_OUTPUT
+
+      - name: Export Convex database
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: |
+          mkdir -p ${{ inputs.backup-dir }}
+          npx convex export \
+            --path "${{ inputs.backup-dir }}/convex_${{ steps.ts.outputs.date }}.zip"
+
+      - name: Cleanup old backups
+        run: |
+          cd ${{ inputs.backup-dir }}
+          BACKUPS=$(ls -1t convex_*.zip 2>/dev/null)
+          COUNT=$(echo "$BACKUPS" | grep -c . || true)
+          if [ "$COUNT" -gt "${{ inputs.backup-retention }}" ]; then
+            echo "$BACKUPS" | tail -n +$((${{ inputs.backup-retention }} + 1)) | while read -r file; do
+              rm -f "$file"
+              echo "Deleted old backup: $file"
+            done
+          fi
+
+      - name: Commit backups
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore(backup): convex ${{ steps.ts.outputs.date }}'
+          file_pattern: '${{ inputs.backup-dir }}/*'
+          commit_user_name: 'Backup Bot'
+          commit_user_email: 'backup-bot@automated.local'

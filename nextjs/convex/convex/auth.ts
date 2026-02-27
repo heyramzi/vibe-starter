@@ -1,59 +1,51 @@
-import { convexAuth } from "@convex-dev/auth/server"
-import { Email } from "@convex-dev/auth/providers/Email"
-import { generateRandomString, type RandomReader } from "@oslojs/crypto/random"
+import { createClient, type GenericCtx } from "@convex-dev/better-auth"
+import { convex } from "@convex-dev/better-auth/plugins"
+import { components } from "./_generated/api"
+import type { DataModel } from "./_generated/dataModel"
+import { query } from "./_generated/server"
+import { betterAuth } from "better-auth/minimal"
+import { emailOTP } from "better-auth/plugins"
+import authConfig from "./auth.config"
 
-const random: RandomReader = {
-  read(bytes: Uint8Array): void {
-    crypto.getRandomValues(bytes)
-  },
+const siteUrl = process.env.SITE_URL!
+
+export const authComponent = createClient<DataModel>(components.betterAuth)
+
+export const createAuth = (ctx: GenericCtx<DataModel>) => {
+	return betterAuth({
+		baseURL: siteUrl,
+		database: authComponent.adapter(ctx),
+		plugins: [
+			convex({ authConfig }),
+			emailOTP({
+				async sendVerificationOTP({ email, otp, type }) {
+					const res = await fetch("https://www.unosend.co/api/v1/emails", {
+						method: "POST",
+						headers: {
+							Authorization: `Bearer ${process.env.UNOSEND_API_KEY}`,
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							from: process.env.EMAIL_FROM ?? "noreply@example.com",
+							to: [email],
+							subject: `${otp} is your verification code`,
+							html: `<p>Your verification code is: <strong>${otp}</strong></p><p>This code expires in 5 minutes.</p>`,
+						}),
+					})
+					if (!res.ok) {
+						throw new Error(`Failed to send email: ${res.status}`)
+					}
+				},
+				otpLength: 6,
+				expiresIn: 300,
+			}),
+		],
+	})
 }
 
-function generateOTP(length: number): string {
-  const digits = "0123456789"
-  return generateRandomString(random, digits, length)
-}
-
-async function sendEmailWithUnoSend(options: {
-  to: string
-  subject: string
-  html: string
-}) {
-  const response = await fetch("https://www.unosend.co/api/v1/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.UNOSEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: process.env.EMAIL_FROM ?? "noreply@example.com",
-      to: [options.to],
-      subject: options.subject,
-      html: options.html,
-    }),
-  })
-
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.error?.message ?? `Email failed: ${response.status}`)
-  }
-}
-
-const EmailOTP = Email({
-  id: "email-otp",
-  apiKey: process.env.UNOSEND_API_KEY,
-  maxAge: 60 * 15, // 15 minutes
-  async generateVerificationToken() {
-    return generateOTP(6)
-  },
-  async sendVerificationRequest({ identifier: email, token }) {
-    await sendEmailWithUnoSend({
-      to: email,
-      subject: "Your verification code",
-      html: `<p>Your verification code is: <strong>${token}</strong></p><p>This code expires in 15 minutes.</p>`,
-    })
-  },
-})
-
-export const { auth, signIn, signOut, store } = convexAuth({
-  providers: [EmailOTP],
+export const getCurrentUser = query({
+	args: {},
+	handler: async (ctx) => {
+		return authComponent.getAuthUser(ctx)
+	},
 })

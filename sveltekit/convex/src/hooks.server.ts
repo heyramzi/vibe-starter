@@ -1,8 +1,8 @@
 import type { Handle } from "@sveltejs/kit"
-import { ConvexHttpClient } from "convex/browser"
-import { PUBLIC_CONVEX_URL } from "$env/static/public"
+import { createAuth } from "../convex/auth"
+import { getToken } from "@mmailaender/convex-better-auth-svelte/sveltekit"
 
 export const handle: Handle = async ({ event, resolve }) => {
-  event.locals.convex = new ConvexHttpClient(PUBLIC_CONVEX_URL)
-  return resolve(event)
+	event.locals.token = await getToken(createAuth, event.cookies)
+	return resolve(event)
 }
