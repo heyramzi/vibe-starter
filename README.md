@@ -59,40 +59,9 @@ vibe-starter/
     └── convex/           # SvelteKit + Convex
 ```
 
-## Ralph: Autonomous Coding Loop
-
-Ship features while you sleep. Ralph runs Claude Code in a loop, completing user stories one at a time.
-
-```bash
-# 1. Edit prd.json with your stories
-vim scripts/ralph/prd.json
-
-# 2. Run Ralph (default 10 iterations)
-./scripts/ralph/ralph.sh
-
-# Or specify max iterations
-./scripts/ralph/ralph.sh 25
-```
-
-**How it works:**
-- Each iteration picks one story from `prd.json`
-- Implements it, runs typecheck, commits
-- Marks story as done, logs learnings
-- Repeats until all stories pass
-
-**Files:**
-- `scripts/ralph/prd.json` - Your user stories
-- `scripts/ralph/progress.txt` - Learnings accumulate here
-- `scripts/ralph/prompt.md` - Agent instructions
-
-**Tips:**
-- Keep stories small (one context window)
-- Include explicit acceptance criteria
-- Always include "typecheck passes" as criteria
-
 ## Documentation
 
-Read `.claude/CLAUDE.md` before starting development.
+Read `CLAUDE.md` for AI agent instructions and `.claude/` for detailed development guidelines.
 
 ## License
 

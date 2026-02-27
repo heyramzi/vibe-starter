@@ -61,4 +61,4 @@ pnpm lint          # Lint code
 
 ## Documentation
 
-See `../../.claude/CLAUDE.md` for development guidelines.
+See `../../CLAUDE.md` for development guidelines.

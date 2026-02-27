@@ -8,7 +8,7 @@
 project-name/
 ├── .claude/                    # AI agent documentation system
 │   ├── CLAUDE.md              # AI agent instructions
-│   ├── steering/              # Project context documents
+│   ├── context/               # Project context documents
 │   │   ├── product.md         # Product vision and goals
 │   │   ├── tech.md            # Technical architecture
 │   │   └── structure.md       # This file
@@ -147,8 +147,7 @@ types/ (type definitions)
 
 ### Development Tools
 
-- **`prettier.config.js`**: Code formatting
-- **`eslint.config.js`**: Code linting (flat config)
+- **`biome.json`**: Linting and formatting (Biome)
 - **`vitest.config.ts`**: Unit testing
 - **`.env.local`**: Environment variables (not committed)
 

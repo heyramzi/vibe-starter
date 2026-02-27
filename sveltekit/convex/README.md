@@ -68,4 +68,4 @@ pnpm check         # Type-check
 
 ## Documentation
 
-See `../../.claude/CLAUDE.md` for development guidelines.
+See `../../CLAUDE.md` for development guidelines.

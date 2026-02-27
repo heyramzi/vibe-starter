@@ -3,16 +3,16 @@
 ## Tech Stack
 
 ### Core Framework
-- **Framework**: Next.js 15+ / SvelteKit 2+
+- **Framework**: Next.js 16+ / SvelteKit 2+
 - **Language**: TypeScript 5.x (strict mode)
 - **Styling**: TailwindCSS 4.x
 - **Package Manager**: PNPM 10.x
 - **Node Version**: >= 22.0.0
 
 ### Database & Auth
-- **Database**: Supabase (PostgreSQL)
-- **Auth**: Supabase Auth
-- **ORM**: Supabase Client (no additional ORM)
+- **Database**: Supabase (PostgreSQL) OR Convex (Document DB)
+- **Auth**: Email OTP (Supabase Auth or Convex Auth)
+- **ORM**: Supabase Client / Convex Client (no additional ORM)
 
 ### UI Components
 - **Next.js**: shadcn/ui + Radix UI primitives
@@ -24,8 +24,7 @@
 - **E2E**: Playwright (optional)
 
 ### Code Quality
-- **Linting**: ESLint 9+ (flat config)
-- **Formatting**: Prettier
+- **Linting & Formatting**: Biome
 - **Type Checking**: TypeScript strict mode
 
 ## Architecture Decisions
@@ -40,10 +39,9 @@
 - Client state: minimal, component-local
 - No global state library needed for most apps
 
-### Supabase Integration
-- Separate clients for server/client contexts
-- Use `@supabase/ssr` for session management
-- Row Level Security (RLS) for authorization
+### Backend Integration
+- **Supabase**: Separate clients for server/client contexts, `@supabase/ssr` for sessions, RLS for authorization
+- **Convex**: TypeScript functions for queries/mutations, `@convex-dev/auth` for auth, reactive queries built-in
 
 ### File Organization
 - Feature-based organization within `src/lib/`

@@ -15,7 +15,7 @@ pnpm test:run          # CI mode
 # Code quality
 pnpm lint              # Check
 pnpm lint:fix          # Auto-fix
-pnpm format            # Format with Prettier
+pnpm format            # Format with Biome
 pnpm format:check      # Check formatting
 ```
 
